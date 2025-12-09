@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "636589956498",
+    "project_id": "ecoclassify-c0bad",
+    "storage_bucket": "ecoclassify-c0bad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636589956498:android:a4dfcd3b6fc3dc2c89f54b",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbXsXi6TTbgVkEo5bzDq0mj1lseYrycZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
