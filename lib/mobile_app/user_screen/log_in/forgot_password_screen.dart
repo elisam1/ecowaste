@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -34,12 +34,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _isLoading = false;
       });
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Password reset email sent! Check your inbox.'),
           backgroundColor: Colors.green,
         ),
       );
+if (!mounted) return;
 
       Navigator.pop(context); // go back to sign-in screen
     } on FirebaseAuthException catch (e) {
@@ -52,6 +54,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         errorMsg = 'No user found with that email.';
       } else {
         errorMsg = e.message ?? errorMsg;
+      if (!mounted) return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,3 +132,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 }
+
+
+

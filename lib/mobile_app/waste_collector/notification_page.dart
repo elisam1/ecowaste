@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 
 class CollectorNotificationPage extends StatefulWidget {
   const CollectorNotificationPage({super.key});
@@ -135,7 +136,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -258,7 +259,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
               Icon(Icons.payment, color: Colors.green.shade600, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Payment Released! 🎉',
+                'Payment Released! ðŸŽ‰',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -269,7 +270,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Amount: GH₵ ${totalAmount.toStringAsFixed(2)} (${binCount} bin${binCount > 1 ? 's' : ''})',
+            'Amount: GHâ‚µ ${totalAmount.toStringAsFixed(2)} (${binCount} bin${binCount > 1 ? 's' : ''})',
             style: TextStyle(fontSize: 13, color: Colors.green.shade700),
           ),
           Text(
@@ -304,7 +305,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
           .doc(notificationId)
           .update({'isRead': true});
     } catch (e) {
-      print('Error marking notification as read: $e');
+
     }
   }
 
@@ -414,3 +415,6 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
     }
   }
 }
+
+
+

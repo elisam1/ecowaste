@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 class UserNotificationPage extends StatefulWidget {
   const UserNotificationPage({super.key});
@@ -133,7 +132,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -307,7 +306,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Amount: GH₵ ${totalAmount.toStringAsFixed(2)} (${binCount} bin${binCount > 1 ? 's' : ''})',
+            'Amount: GHâ‚µ ${totalAmount.toStringAsFixed(2)} (${binCount} bin${binCount > 1 ? 's' : ''})',
             style: TextStyle(
               fontSize: 13,
               color: shouldDisableButtons
@@ -413,7 +412,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
         title: const Text('Confirm Pickup Completion'),
         content: Text(
           'Are you sure you want to confirm that ${data['collectorName']} has completed your waste pickup?\n\n'
-          'This will release the payment of GH₵ ${data['totalAmount'].toStringAsFixed(2)} to the collector.',
+          'This will release the payment of GHâ‚µ ${data['totalAmount'].toStringAsFixed(2)} to the collector.',
         ),
         actions: [
           TextButton(
@@ -451,7 +450,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Pickup confirmed! Payment of GH₵ ${data['totalAmount'].toStringAsFixed(2)} has been released to ${data['collectorName']}',
+                'Pickup confirmed! Payment of GHâ‚µ ${data['totalAmount'].toStringAsFixed(2)} has been released to ${data['collectorName']}',
               ),
               backgroundColor: Colors.green.shade600,
             ),
@@ -488,26 +487,32 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
           children: [
             const Text('What issue did you encounter with this pickup?'),
             const SizedBox(height: 16),
-            ...['waste_not_collected', 'poor_service', 'other'].map((
-              issueType,
-            ) {
-              return RadioListTile<String>(
-                title: Text(
-                  issueType
-                      .replaceAll('_', ' ')
-                      .replaceAll('poor', 'Poor')
-                      .replaceAll('not', 'Not')
-                      .replaceAll('other', 'Other'),
-                ),
-                value: issueType,
-                groupValue: selectedIssueType,
-                onChanged: (value) {
-                  setState(() {
-                    selectedIssueType = value;
-                  });
-                },
-              );
-            }),
+            SegmentedButton<String>(
+              segments: ['waste_not_collected', 'poor_service', 'other']
+                  .map(
+                    (issueType) => ButtonSegment<String>(
+                      value: issueType,
+                      label: Text(
+                        issueType
+                            .replaceAll('_', ' ')
+                            .replaceAll('poor', 'Poor')
+                            .replaceAll('not', 'Not')
+                            .replaceAll('other', 'Other'),
+                      ),
+                    ),
+                  )
+                  .toList(),
+              selected: selectedIssueType != null
+                  ? <String>{selectedIssueType!}
+                  : <String>{},
+              onSelectionChanged: (newSelection) {
+                setState(() {
+                  selectedIssueType = newSelection.isNotEmpty
+                      ? newSelection.first
+                      : null;
+                });
+              },
+            ),
           ],
         ),
         actions: [
@@ -573,9 +578,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
           .collection('notifications')
           .doc(notificationId)
           .update({'isRead': true});
-    } catch (e) {
-      print('Error marking notification as read: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _markAllAsRead() async {

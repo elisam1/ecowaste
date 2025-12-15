@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+
 
 class AccessRouteScreen extends StatefulWidget {
   const AccessRouteScreen({Key? key}) : super(key: key);
@@ -42,7 +43,7 @@ class _AccessRouteScreenState extends State<AccessRouteScreen> {
       });
       _mapController?.animateCamera(CameraUpdate.newLatLng(_collectorLocation!));
     } catch (e) {
-      print("Error fetching location: $e");
+
     }
   }
 
@@ -68,3 +69,5 @@ class _AccessRouteScreenState extends State<AccessRouteScreen> {
     );
   }
 }
+
+

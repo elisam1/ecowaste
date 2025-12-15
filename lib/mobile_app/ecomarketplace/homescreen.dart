@@ -1,10 +1,7 @@
-// home_screen.dart
+﻿// home_screen.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/mobile_app/ecomarketplace/add_items.dart';
-import 'package:flutter_application_1/mobile_app/ecomarketplace/itemdetails.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'my_listing_page.dart';
 
 class MarketHomeScreen extends StatefulWidget {
   const MarketHomeScreen({super.key});
@@ -188,7 +185,7 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: category['color'].withOpacity(0.3),
+                                color: category['color'].withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -333,10 +330,7 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
         Navigator.pushNamed(
           context,
           '/item-detail',
-          arguments: {
-            'itemId': itemId,
-            'itemData': data,
-          },
+          arguments: {'itemId': itemId, 'itemData': data},
         );
       },
       child: Card(
@@ -483,7 +477,7 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
                           decoration: BoxDecoration(
                             color: _getConditionColor(
                               data['condition'],
-                            ).withOpacity(0.1),
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

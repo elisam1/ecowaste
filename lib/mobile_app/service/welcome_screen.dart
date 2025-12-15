@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 
@@ -124,11 +124,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               width: 120,
                               height: 120,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(60),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -181,10 +181,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             vertical: 16,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                             ),
                           ),
                           child: const Text(
@@ -238,7 +238,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF4CAF50).withOpacity(0.4),
+                                color: const Color(0xFF4CAF50).withValues(alpha: 0.4),
                                 blurRadius: 15,
                                 offset: const Offset(0, 8),
                               ),
@@ -293,7 +293,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       //     decoration: BoxDecoration(
                       //       borderRadius: BorderRadius.circular(16),
                       //       border: Border.all(
-                      //         color: Colors.white.withOpacity(0.3),
+                      //         color: Colors.white.withValues(alpha: 0.3),
                       //         width: 1.5,
                       //       ),
                       //       color: Colors.transparent,
@@ -342,7 +342,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           'Join thousands making a difference',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -365,9 +365,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
           child: Icon(icon, color: Colors.white, size: 24),
         ),
@@ -397,7 +397,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(40),
               ),
             ),
@@ -412,7 +412,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
@@ -427,7 +427,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -441,7 +441,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             opacity: _fadeAnimation,
             child: Icon(
               Icons.eco,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               size: 30,
             ),
           ),
@@ -453,7 +453,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             opacity: _fadeAnimation,
             child: Icon(
               Icons.recycling,
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               size: 25,
             ),
           ),
@@ -462,3 +462,4 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 }
+

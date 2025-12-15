@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'chat_page.dart'; // make sure this import path is correct
 
 class ChatListPage extends StatelessWidget {
   const ChatListPage({super.key});
@@ -178,7 +177,8 @@ class ChatListPage extends StatelessWidget {
                             '/chat',
                             arguments: {
                               'collectorId': chat['collectorId'],
-                              'collectorName': chat['collectorName'] ?? 'Collector',
+                              'collectorName':
+                                  chat['collectorName'] ?? 'Collector',
                               'requestId': chat['requestId'],
                               'userName': chat['userName'] ?? 'User',
                             },

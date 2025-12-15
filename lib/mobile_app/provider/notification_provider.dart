@@ -1,10 +1,11 @@
-// ignore_for_file: unused_import
+﻿// ignore_for_file: unused_import
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 
 class NotificationProvider extends ChangeNotifier {
   int _unreadCount = 0;
@@ -42,7 +43,7 @@ class NotificationProvider extends ChangeNotifier {
           .doc(notificationId)
           .update({'isRead': true});
     } catch (e) {
-      print('Error marking notification as read: $e');
+
     }
   }
 
@@ -64,7 +65,7 @@ class NotificationProvider extends ChangeNotifier {
       }
       await batch.commit();
     } catch (e) {
-      print('Error marking all notifications as read: $e');
+
     }
   }
 
@@ -86,7 +87,7 @@ class NotificationProvider extends ChangeNotifier {
         'createdAt': Timestamp.now(),
       });
     } catch (e) {
-      print('Error creating notification: $e');
+
     }
   }
 
@@ -96,3 +97,5 @@ class NotificationProvider extends ChangeNotifier {
     super.dispose();
   }
 }
+
+

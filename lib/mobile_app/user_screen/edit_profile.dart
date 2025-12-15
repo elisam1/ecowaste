@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
@@ -32,6 +32,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
     super.initState();
 
     Future.microtask(() async {
+      if (!mounted) return;
       final provider = Provider.of<UserProvider>(context, listen: false);
       await provider
           .fetchUserData(); // Make sure it populates `name`, `email`, `town`
@@ -153,9 +154,9 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
           await user.updatePassword(_newPasswordController.text.trim());
         }
 
-        //  Update email if it changed
+        //  Update email if it changed â€” use verifyBeforeUpdateEmail
         if (_emailController.text.trim() != user.email) {
-          await user.updateEmail(_emailController.text.trim());
+          await user.verifyBeforeUpdateEmail(_emailController.text.trim());
         }
 
         //  Update Firestore user profile
@@ -234,7 +235,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),
@@ -275,7 +276,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),
@@ -377,7 +378,7 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),
@@ -416,7 +417,9 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                               }
                             });
                           },
-                          activeColor: Colors.green[700],
+                          thumbColor: WidgetStateProperty.all(
+                            Colors.green[700],
+                          ),
                         ),
                       ],
                     ),
@@ -545,9 +548,9 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '• At least 8 characters long\n'
-                              '• Contains uppercase and lowercase letters\n'
-                              '• Contains at least one number',
+                              'â€¢ At least 8 characters long\n'
+                              'â€¢ Contains uppercase and lowercase letters\n'
+                              'â€¢ Contains at least one number',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue[700],
@@ -622,3 +625,5 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
     );
   }
 }
+
+

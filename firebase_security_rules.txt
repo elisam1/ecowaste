@@ -1,0 +1,286 @@
+// EcoWaste Firebase Security Rules
+// These rules should be deployed to Firebase Console
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role ?? 'user';
+    }
+
+    function getCollectorRole() {
+      return get(/databases/$(database)/documents/collectors/$(request.auth.uid)).data.role ?? 'collector';
+    }
+
+    function isAdmin() {
+      return getUserRole() == 'admin' || getCollectorRole() == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Limit request size
+    function isSmallRequest() {
+      return request.size < 16 * 1024; // 16 KB limit
+    }
+
+    // Rate limiting helper
+    function rateLimitCheck(collectionName, limit, period) {
+      let userRequests = firestore.query(collectionName)
+        .where('userId', '==', request.auth.uid)
+        .where('timestamp', '>=', now - duration.value(period, 's'))
+        .count();
+      return userRequests.data.count < limit;
+    }
+
+    // ============ USERS COLLECTION ============
+    match /users/{userId} {
+      // Read own user document
+      allow read: if isUser(userId);
+
+      // Create user account on signup
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'user'
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0;
+
+      // Update own profile
+      allow update: if isUser(userId)
+        && isSmallRequest()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role;
+
+      // Delete own account (admin only)
+      allow delete: if isAdmin();
+
+      // Subcollection: favorites
+      match /favorites/{favoriteId} {
+        allow read, create, update, delete: if isUser(userId)
+          && isSmallRequest();
+      }
+
+      // Subcollection: saved searches
+      match /saved_searches/{searchId} {
+        allow read, create, update, delete: if isUser(userId);
+      }
+    }
+
+    // ============ COLLECTORS COLLECTION ============
+    match /collectors/{collectorId} {
+      // Read collector profile
+      allow read: if isAuthenticated();
+
+      // Create collector account
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'collector'
+        && request.resource.data.email is string;
+
+      // Update own profile
+      allow update: if isUser(collectorId)
+        && isSmallRequest()
+        && request.resource.data.uid == resource.data.uid;
+
+      // Delete account
+      allow delete: if isAdmin();
+
+      // Subcollection: availability schedule
+      match /schedule/{scheduleId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isUser(collectorId);
+      }
+    }
+
+    // ============ PICKUP REQUESTS COLLECTION ============
+    match /pickup_requests/{requestId} {
+      // Users can read their own requests
+      allow read: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.collectorId == request.auth.uid);
+
+      // Users can create requests
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && isSmallRequest();
+
+      // Users/Collectors can update their requests
+      allow update: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.collectorId == request.auth.uid)
+        && isSmallRequest();
+
+      // Admins can delete
+      allow delete: if isAdmin();
+    }
+
+    // ============ MARKETPLACE ITEMS COLLECTION ============
+    match /marketplace_items/{itemId} {
+      // Anyone can read active items
+      allow read: if resource.data.isActive == true;
+
+      // Sellers can read their own items
+      allow read: if isAuthenticated()
+        && resource.data.sellerId == request.auth.uid;
+
+      // Create item (with rate limiting)
+      allow create: if isAuthenticated()
+        && request.resource.data.sellerId == request.auth.uid
+        && request.resource.data.isActive == true
+        && isSmallRequest()
+        && rateLimitCheck('/marketplace_items', 10, 3600);
+
+      // Update own items
+      allow update: if isAuthenticated()
+        && resource.data.sellerId == request.auth.uid
+        && resource.data.sellerId == request.resource.data.sellerId
+        && isSmallRequest();
+
+      // Delete own items
+      allow delete: if isAuthenticated()
+        && resource.data.sellerId == request.auth.uid;
+    }
+
+    // ============ CHATS COLLECTION ============
+    match /chats/{chatId} {
+      // Participants can read chat
+      allow read: if isAuthenticated()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.collectorId == request.auth.uid);
+
+      // Create chat (automatic, system-managed)
+      allow create: if isAuthenticated()
+        && (request.resource.data.userId == request.auth.uid
+          || request.resource.data.collectorId == request.auth.uid);
+
+      // Subcollection: messages
+      match /messages/{messageId} {
+        // Participants can read messages
+        allow read: if isAuthenticated()
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.userId == request.auth.uid
+          || get(/databases/$(database)/documents/chats/$(chatId)).data.collectorId == request.auth.uid;
+
+        // Sender can create message
+        allow create: if isAuthenticated()
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && isSmallRequest();
+
+        // Sender can update message (edit/delete)
+        allow update: if isAuthenticated()
+          && resource.data.senderId == request.auth.uid
+          && isSmallRequest();
+      }
+    }
+
+    // ============ REVIEWS COLLECTION ============
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if true;
+
+      // Create review (rate limited)
+      allow create: if isAuthenticated()
+        && request.resource.data.reviewerId == request.auth.uid
+        && rateLimitCheck('/reviews', 3, 86400); // 3 per day
+
+      // Reviewer can update own review
+      allow update: if isAuthenticated()
+        && resource.data.reviewerId == request.auth.uid;
+
+      // Reviewer or admin can delete
+      allow delete: if isAuthenticated()
+        && (resource.data.reviewerId == request.auth.uid || isAdmin());
+    }
+
+    // ============ NOTIFICATIONS COLLECTION ============
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+
+      // Create notifications (system only, not from client)
+      allow create: if false;
+
+      // Users can update (mark as read)
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+
+      // Users can delete
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ============ TRANSACTIONS COLLECTION ============
+    match /transactions/{transactionId} {
+      // Only involved parties can read
+      allow read: if isAuthenticated()
+        && (resource.data.buyerId == request.auth.uid
+          || resource.data.sellerId == request.auth.uid);
+
+      // System creates transactions
+      allow create: if false;
+
+      // Admin can view all
+      allow read: if isAdmin();
+    }
+
+    // ============ CATCH-ALL (DENY) ============
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ============ STORAGE RULES ============
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User avatars
+    match /users/{userId}/avatar {
+      allow read: if true;
+      allow write: if request.auth.uid == userId
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 5 * 1024 * 1024; // 5 MB
+    }
+
+    // Marketplace item images
+    match /marketplace/{sellerId}/items/{itemId}/{imageFile} {
+      allow read: if true;
+      allow write: if request.auth.uid == sellerId
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Chat attachments
+    match /chats/{chatId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024; // 10 MB
+    }
+
+    // Pickup verification photos
+    match /pickups/{pickupId}/verification/{photoFile} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

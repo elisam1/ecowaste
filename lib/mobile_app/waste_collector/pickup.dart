@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 ///import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
@@ -373,7 +373,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF26A69A).withOpacity(0.3),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -566,7 +566,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -581,7 +581,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -595,7 +595,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               ),
               const Spacer(),
               Text(
-                'GH₵ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
+                'GHâ‚µ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
                 style: const TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
@@ -674,7 +674,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 Icon(Icons.payment, color: Colors.grey[500], size: 16),
                 const SizedBox(width: 4),
                 Text(
-                  '${request['binCount']} bins × GH₵${request['pricePerBin']} = GH₵${request['totalAmount']}',
+                  '${request['binCount']} bins Ã— GHâ‚µ${request['pricePerBin']} = GHâ‚µ${request['totalAmount']}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
@@ -775,7 +775,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -790,7 +790,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -806,7 +806,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -820,7 +820,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               ),
               const Spacer(),
               Text(
-                'GH₵ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
+                'GHâ‚µ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
                 style: const TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
@@ -898,7 +898,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 Icon(Icons.payment, color: Colors.grey[500], size: 16),
                 const SizedBox(width: 4),
                 Text(
-                  '${request['binCount']} bins × GH₵${request['pricePerBin']} = GH₵${request['totalAmount']}',
+                  '${request['binCount']} bins Ã— GHâ‚µ${request['pricePerBin']} = GHâ‚µ${request['totalAmount']}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
@@ -1050,7 +1050,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
@@ -1090,7 +1090,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -1203,6 +1203,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
 
   // Firebase Operations
   Future<void> _updateRequestStatus(String requestId, String newStatus) async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final updateData = {
         'status': newStatus,
@@ -1234,27 +1235,27 @@ class _PickupManagementPageState extends State<PickupManagementPage>
 
             switch (newStatus) {
               case 'accepted':
-                title = '✅ Pickup Request Accepted';
+                title = 'âœ… Pickup Request Accepted';
                 message =
                     'Your pickup request has been accepted by ${widget.collectorName}';
                 break;
               case 'in_progress':
-                title = '🚚 Pickup In Progress';
+                title = 'ðŸšš Pickup In Progress';
                 message =
                     '${widget.collectorName} is on the way to collect your waste';
                 break;
               case 'pending_confirmation':
-                title = '🔍 Confirm Pickup Completion';
+                title = 'ðŸ” Confirm Pickup Completion';
                 message =
                     '${widget.collectorName} has marked your pickup as completed. Please confirm to release payment.';
                 break;
               case 'completed':
-                title = '🎉 Pickup Completed & Confirmed';
+                title = 'ðŸŽ‰ Pickup Completed & Confirmed';
                 message =
                     'Your waste pickup has been confirmed and payment has been released to ${widget.collectorName}';
                 break;
               case 'cancelled':
-                title = '❌ Pickup Request Cancelled';
+                title = 'âŒ Pickup Request Cancelled';
                 message =
                     'Your pickup request has been cancelled by ${widget.collectorName}';
                 break;
@@ -1282,43 +1283,46 @@ class _PickupManagementPageState extends State<PickupManagementPage>
             }
           }
         }
-      } catch (e) {
-        print('Error creating pickup status notification: $e');
-      }
+      } catch (e) {}
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Request ${newStatus.replaceAll('_', ' ')} successfully',
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Request ${newStatus.replaceAll('_', ' ')} successfully',
+            ),
+            backgroundColor: Colors.green,
           ),
-          backgroundColor: Colors.green,
-        ),
-      );
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update request: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to update request: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _deleteRequest(String requestId) async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await FirebaseFirestore.instance
           .collection('pickup_requests')
           .doc(requestId)
           .delete();
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Completed request deleted successfully'),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Failed to delete request: ${e.toString()}'),
           backgroundColor: Colors.red,
@@ -1385,7 +1389,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
       builder: (context) => AlertDialog(
         title: const Text('Complete Pickup'),
         content: const Text(
-          'Mark this pickup as completed?\n\n⚠️ User will be notified to confirm completion before payment is released.',
+          'Mark this pickup as completed?\n\nâš ï¸ User will be notified to confirm completion before payment is released.',
         ),
         actions: [
           TextButton(

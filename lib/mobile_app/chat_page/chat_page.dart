@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -153,7 +153,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         .collection('chats')
         .doc(widget.requestId)
         .update({
-          'lastMessage': imageUrl != null ? '📷 Photo' : text,
+          'lastMessage': imageUrl != null ? 'ðŸ“· Photo' : text,
           'lastMessageTime': FieldValue.serverTimestamp(),
           'unreadCount.$otherUserType': FieldValue.increment(1),
           '${currentUserType}Typing': false,
@@ -162,17 +162,22 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
     // Create notification for the recipient
     try {
-      final recipientId = currentUserType == 'collector' ? user?.uid : widget.collectorId;
+      final recipientId = currentUserType == 'collector'
+          ? user?.uid
+          : widget.collectorId;
       if (recipientId != null) {
         await FirebaseFirestore.instance.collection('notifications').add({
           'userId': recipientId,
           'type': 'new_message',
-          'title': '💬 New Message',
-          'message': '${currentUserType == 'collector' ? widget.collectorName : (widget.userName ?? 'User')}: ${imageUrl != null ? '📷 Photo' : text}',
+          'title': 'ðŸ’¬ New Message',
+          'message':
+              '${currentUserType == 'collector' ? widget.collectorName : (widget.userName ?? 'User')}: ${imageUrl != null ? 'ðŸ“· Photo' : text}',
           'data': {
             'chatId': widget.requestId,
             'senderId': currentUser.uid,
-            'senderName': currentUserType == 'collector' ? widget.collectorName : (widget.userName ?? 'User'),
+            'senderName': currentUserType == 'collector'
+                ? widget.collectorName
+                : (widget.userName ?? 'User'),
             'message': text,
             'imageUrl': imageUrl,
             'messageType': type.name,
@@ -181,9 +186,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
-    } catch (e) {
-      print('Error creating chat notification: $e');
-    }
+    } catch (e) {}
 
     setState(() {
       isTyping = false;
@@ -236,9 +239,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         }
         await notificationBatch.commit();
       }
-    } catch (e) {
-      print('Error marking notifications as read: $e');
-    }
+    } catch (e) {}
   }
 
   void _setTypingStatus(bool typing) async {
@@ -273,6 +274,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       final imageUrl = await ref.getDownloadURL();
       _sendMessage('', type: MessageType.text, imageUrl: imageUrl);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to upload image: $e')));
@@ -307,7 +309,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   void _shareLocation() {
     _sendMessage(
-      '📍 Location shared\nKumasi, Ashanti Region\nTap to open in maps',
+      'ðŸ“ Location shared\nKumasi, Ashanti Region\nTap to open in maps',
       type: MessageType.location,
     );
   }
@@ -317,7 +319,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (time != null) {
+    if (time != null && mounted) {
       final date = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -325,10 +327,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         lastDate: DateTime.now().add(const Duration(days: 7)),
       );
 
-      if (date != null) {
+      if (date != null && mounted) {
         final formattedDate = '${date.day}/${date.month}/${date.year}';
         _sendMessage(
-          '⏰ Pickup scheduled for ${time.format(context)} on $formattedDate',
+          'â° Pickup scheduled for ${time.format(context)} on $formattedDate',
           type: MessageType.schedule,
         );
       }
@@ -378,7 +380,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       backgroundColor: Colors.green[600],
       foregroundColor: Colors.white,
       elevation: 3,
-      shadowColor: Colors.green.withOpacity(0.5),
+      shadowColor: Colors.green.withValues(alpha: 0.5),
       title: Row(
         children: [
           Stack(
@@ -564,11 +566,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
 
   Widget _buildQuickReplies() {
     final quickReplies = [
-      '👋 Hello!',
-      '📍 I\'m here',
-      '✅ Ready for pickup',
-      '⏰ What time?',
-      '👍 Thank you!',
+      'ðŸ‘‹ Hello!',
+      'ðŸ“ I\'m here',
+      'âœ… Ready for pickup',
+      'â° What time?',
+      'ðŸ‘ Thank you!',
     ];
 
     return Container(
@@ -588,7 +590,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               ),
               onPressed: () => _sendQuickReply(quickReplies[index]),
               backgroundColor: Colors.white,
-              side: BorderSide(color: Colors.green.withOpacity(0.3)),
+              side: BorderSide(color: Colors.green.withValues(alpha: 0.3)),
             ),
           );
         },
@@ -621,7 +623,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -719,7 +721,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -901,7 +903,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: ['❤️', '👍', '😊', '😢', '😮', '😡']
+              children: ['â¤ï¸', 'ðŸ‘', 'ðŸ˜Š', 'ðŸ˜¢', 'ðŸ˜®', 'ðŸ˜¡']
                   .map(
                     (emoji) => GestureDetector(
                       onTap: () {
@@ -998,6 +1000,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
+              final messenger = ScaffoldMessenger.of(context);
               // Clear all messages
               final messages = await FirebaseFirestore.instance
                   .collection('chats')
@@ -1011,9 +1014,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               }
               await batch.commit();
 
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Chat cleared')));
+              if (mounted) {
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Chat cleared')),
+                );
+              }
             },
             child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
@@ -1070,7 +1075,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -1122,7 +1127,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -1260,7 +1265,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -1378,7 +1383,7 @@ class _QuickActionButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class CollectorAboutPage extends StatefulWidget {
   const CollectorAboutPage({super.key});
@@ -154,7 +154,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -246,7 +246,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -268,7 +268,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
                     60,
                     232,
                     106,
-                  ).withOpacity(0.4),
+                  ).withValues(alpha: 0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 5),
                 ),
@@ -383,7 +383,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10),
+          BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10),
         ],
       ),
       child: Column(
@@ -547,7 +547,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
           ),
           const SizedBox(height: 8),
           Text(
-            '© $_copyrightYear $_teamName',
+            'Â© $_copyrightYear $_teamName',
             style: TextStyle(color: Colors.grey.shade600),
           ),
         ],
@@ -581,3 +581,4 @@ class BenefitItem {
     required this.description,
   });
 }
+

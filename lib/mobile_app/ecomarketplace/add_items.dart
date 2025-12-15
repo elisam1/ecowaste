@@ -1,4 +1,4 @@
-// add_item_screen.dart
+﻿// add_item_screen.dart
 // ==========================================
 
 import 'dart:io';
@@ -143,6 +143,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       });
 
       _showSuccessSnackBar('Item listed successfully!');
+      if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
       debugPrint('Error submitting item: $e');
@@ -355,7 +356,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -393,7 +394,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -410,7 +411,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           filled: true,
           fillColor: Colors.white,
         ),
-        value: value,
+        initialValue: value,
         items: items.map((item) {
           return DropdownMenuItem(value: item, child: Text(item));
         }).toList(),

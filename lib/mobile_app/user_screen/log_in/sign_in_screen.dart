@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
@@ -423,12 +423,13 @@ class _SignInScreenState extends State<SignInScreen>
           _isLoading = false;
         });
 
+        if (!mounted) return;
+
         Navigator.pushNamed(
           context,
           AppRoutes.collectorHome,
           arguments: {'role': 'collector', 'collectorId': uid},
         );
-        return;
       }
 
       // Step 3: Try to get from 'users' collection
@@ -442,6 +443,7 @@ class _SignInScreenState extends State<SignInScreen>
           _isLoading = false;
         });
 
+        if (!mounted) return;
         Navigator.pushNamed(
           context,
           AppRoutes.home,
@@ -451,32 +453,36 @@ class _SignInScreenState extends State<SignInScreen>
       }
 
       // Neither found
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('User role not found. Please contact support.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      String errorMsg = 'An error occurred';
-      if (e.code == 'user-not-found') {
-        errorMsg = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        errorMsg = 'Incorrect password.';
-      } else {
-        errorMsg = e.message ?? errorMsg;
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User role not found. Please contact support.'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
-      );
+        String errorMsg = 'An error occurred';
+        if (e.code == 'user-not-found') {
+          errorMsg = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          errorMsg = 'Incorrect password.';
+        } else {
+          errorMsg = e.message ?? errorMsg;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 }

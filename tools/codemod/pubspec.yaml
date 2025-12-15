@@ -1,0 +1,10 @@
+name: ecowaste_codemod
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  analyzer: ^5.12.0
+  path: ^1.8.3
+  # glob removed; using Directory traversal instead
+
+executables:
+  replace_withopacity_codemod: replace_withopacity_codemod.dart

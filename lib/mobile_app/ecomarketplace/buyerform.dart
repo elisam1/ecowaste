@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // buyer_form_screen.dart (Enhanced Firebase Integration with Mobile Money Only)
 // ==========================================
 
@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 
 class BuyerFormScreen extends StatefulWidget {
   final Map<String, dynamic> itemData;
@@ -83,9 +84,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         _phoneController.text = collectorData['phone'] ?? '';
         _locationController.text = collectorData['location'] ?? '';
       }
-    } catch (e) {
-      print('Error loading user data: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _loadSellerData() async {
@@ -110,9 +109,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
           _sellerData = sellerDoc.data();
         });
       }
-    } catch (e) {
-      print('Error loading seller data: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _processPurchase() async {
@@ -254,6 +251,10 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         await _processPayment(purchaseId);
       }
 
+      if (!mounted) {
+        return;
+      }
+
       _showSnackBar(
         isFreeItem
             ? 'Item claimed successfully! The seller will contact you shortly.'
@@ -264,15 +265,16 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
       // Return success to previous screen
       Navigator.pop(context, true);
     } catch (e) {
-      print('Error processing purchase: $e');
       _showSnackBar(
         'Failed to complete purchase. Please try again.',
         Colors.red,
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -344,7 +346,6 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         buyerMomoNumber,
       );
     } catch (e) {
-      print('Payment processing error: $e');
       // Update payment status to failed
       await FirebaseFirestore.instance
           .collection('purchases')
@@ -415,9 +416,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         'isRead': false,
         'createdAt': Timestamp.now(),
       });
-    } catch (e) {
-      print('Error creating payment success notifications: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _createSellerNotification(
@@ -441,9 +440,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         'isRead': false,
         'createdAt': Timestamp.now(),
       });
-    } catch (e) {
-      print('Error creating seller notification: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _createBuyerNotification(
@@ -467,9 +464,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         'isRead': false,
         'createdAt': Timestamp.now(),
       });
-    } catch (e) {
-      print('Error creating buyer notification: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _updateUserPurchaseHistory(
@@ -498,9 +493,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
               'lastPurchaseAt': Timestamp.now(),
             });
       }
-    } catch (e) {
-      print('Error updating user purchase history: $e');
-    }
+    } catch (e) {}
   }
 
   Map<String, dynamic> _getPaymentDetails() {
@@ -573,7 +566,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -703,7 +696,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.grey.withValues(alpha: 0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -887,7 +880,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -924,7 +917,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1091,3 +1084,4 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
     );
   }
 }
+

@@ -16,6 +16,7 @@ import 'package:flutter_application_1/mobile_app/ecomarketplace/itemdetails.dart
 //import 'package:flutter_application_1/mobile_app/ecomarketplace/buyer_form_screen.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/provider/notification_provider.dart';
+import 'package:flutter_application_1/mobile_app/provider/theme_provider.dart';
 //import 'package:flutter_application_1/mobile_app/provider/sort_score_provider.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 import 'package:flutter_application_1/mobile_app/service/component/leaderboard.dart';
@@ -38,11 +39,16 @@ import 'package:flutter_application_1/mobile_app/user_screen/notification_page.d
 import 'package:flutter_application_1/mobile_app/user_screen/user_tracking_collector.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/user_request_screen.dart';
 import 'package:flutter_application_1/mobile_app/service/welcome_screen.dart';
+import 'package:flutter_application_1/mobile_app/service/role_selection.dart';
+import 'package:flutter_application_1/mobile_app/waste_collector/scheduling_week.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/bottombar.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/log_in/sign_up.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/profile_screen.dart';
-import 'package:flutter_application_1/mobile_app/service/role_selection.dart';
-import 'package:flutter_application_1/mobile_app/waste_collector/scheduling_week.dart';
+import 'package:flutter_application_1/mobile_app/user_screen/settings_screen.dart';
+import 'package:flutter_application_1/mobile_app/service/advanced_features_dashboard.dart';
+import 'package:flutter_application_1/mobile_app/service/gamification_engine.dart';
+import 'package:flutter_application_1/mobile_app/service/error_handler.dart';
+import 'package:flutter_application_1/mobile_app/service/cache_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // Admin imports - only loaded when neededflu
@@ -60,10 +66,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-  );
+
+  // Initialize Firebase App Check with error handling
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: AndroidProvider.debug,
+    );
+  } catch (e) {
+    // App Check failed to initialize, continue without it
+    print('Firebase App Check initialization failed: $e');
+  }
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Initialize advanced services
+  try {
+    await ErrorHandler().initialize();
+    await CacheManager().initialize();
+  } catch (e) {
+    debugPrint('Error initializing services: $e');
+  }
 
   runApp(
     MultiProvider(
@@ -72,6 +94,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CollectorProvider()),
         ChangeNotifierProvider(create: (_) => SortScoreProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // AdminProvider commented out for mobile app
         // ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
@@ -120,12 +143,28 @@ class _MyAppState extends State<MyApp> {
           await FirebaseFirestore.instance.collection('users').doc(uid).update({
             'fcmToken': token,
           });
+          // Initialize gamification for user
+          await GamificationEngine().checkDailyLogin(uid);
         } else {
-          // Assume it's a collector
-          await FirebaseFirestore.instance
+          // Check if it's a collector
+          final collectorDoc = await FirebaseFirestore.instance
               .collection('collectors')
               .doc(uid)
-              .update({'fcmToken': token});
+              .get();
+          if (collectorDoc.exists) {
+            await FirebaseFirestore.instance
+                .collection('collectors')
+                .doc(uid)
+                .update({'fcmToken': token});
+          } else {
+            // Neither document exists, create user document
+            await FirebaseFirestore.instance.collection('users').doc(uid).set({
+              'fcmToken': token,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+            // Initialize gamification for new user
+            await GamificationEngine().checkDailyLogin(uid);
+          }
         }
       }
     }
@@ -143,15 +182,16 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Waste Classification',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: _initialScreen,
-      onGenerateRoute: _generateRoute,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Waste Classification',
+          theme: themeProvider.currentTheme,
+          home: _initialScreen,
+          onGenerateRoute: _generateRoute,
+        );
+      },
     );
   }
 
@@ -276,18 +316,24 @@ class _MyAppState extends State<MyApp> {
         return _createRoute(const CollectorProfileEditPage());
       case AppRoutes.userProfileEditPage:
         return _createRoute(const UserProfileEditPage());
+      case AppRoutes.settings:
+        return _createRoute(const SettingsScreen());
       case AppRoutes.aboutus:
         return _createRoute(const AboutPage());
       case AppRoutes.markethomescreen:
         return _createRoute(const MarketHomeScreen());
+      case AppRoutes.advancedFeatures:
+        return _createRoute(const AdvancedFeaturesDashboard());
       case AppRoutes.weeklyScheduling:
         final collectorId = args['collectorId'] as String?;
         if (collectorId != null) {
           // Create WeeklySchedulingPage with default suggested towns
-          return _createRoute(WeeklySchedulingPage(
-            collectorId: collectorId,
-            // The suggestedTowns will use the default value from the constructor
-          ));
+          return _createRoute(
+            WeeklySchedulingPage(
+              collectorId: collectorId,
+              // The suggestedTowns will use the default value from the constructor
+            ),
+          );
         } else {
           return _createRoute(
             const Scaffold(

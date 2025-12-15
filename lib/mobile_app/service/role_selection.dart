@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
@@ -56,7 +56,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           style: TextStyle(color: Colors.white),
                         ),
                         TextSpan(
-                          text: '♻',
+                          text: 'â™»',
                           style: TextStyle(
                             color: Color(0xFF4CAF50),
                             fontSize: 40,
@@ -128,7 +128,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Row(
@@ -317,7 +317,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
               // Language Section
               const Text(
-                "🌐 Language",
+                "ðŸŒ Language",
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
 
@@ -330,7 +330,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   "By continuing you agree to our\nTerms of Service & Privacy Policy.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
                     height: 1.5,
                   ),
@@ -343,3 +343,4 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     );
   }
 }
+

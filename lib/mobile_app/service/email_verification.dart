@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart'; // Update if needed
@@ -45,10 +45,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       final user = FirebaseAuth.instance.currentUser!;
       await user.sendEmailVerification();
 
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Verification email sent')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Failed to send email')));
@@ -67,6 +69,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       timer?.cancel();
 
       // Redirect based on role
+      if (!mounted) return;
       if (widget.role == 'collector') {
         Navigator.pushReplacementNamed(
           context,
@@ -108,7 +111,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   TextButton(
                     onPressed: () async {
                       await FirebaseAuth.instance.signOut();
-                      Navigator.pop(context);
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                     child: const Text('Cancel & Logout'),
                   ),

@@ -1,4 +1,4 @@
-// ignore_for_file: unused_import, duplicate_ignore
+﻿// ignore_for_file: unused_import, duplicate_ignore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 Text(
                                   'Waste pickup made easy',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -170,7 +170,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: IconButton(
@@ -225,7 +227,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             // Profile Avatar
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: IconButton(
@@ -308,7 +310,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF26A69A).withOpacity(0.3),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -355,7 +357,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1B5E20).withOpacity(0.3),
+            color: const Color(0xFF1B5E20).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -455,7 +457,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: const Icon(
@@ -642,7 +644,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.3),
+            color: colors.first.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -679,7 +681,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 11,
                   ),
                   textAlign: TextAlign.center,
@@ -706,7 +708,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -751,7 +753,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 .collection('pickup_requests')
                 .where('status', isEqualTo: 'completed')
                 .where('userId', isEqualTo: currentUserId)
-                .orderBy('updatedAt', descending: true) // Use updatedAt to sort
                 .limit(3)
                 .snapshots(),
             builder: (context, snapshot) {
@@ -784,7 +785,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   return _buildPickupItem(
                     collector,
                     userTown,
-                    'Completed • $timeAgo',
+                    'Completed â€¢ $timeAgo',
                     Icons.check_circle,
                     Colors.green,
                   );
@@ -825,7 +826,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -870,7 +871,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -933,7 +934,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF26A69A).withOpacity(0.1),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(icon, color: const Color(0xFF26A69A), size: 16),

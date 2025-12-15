@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
@@ -299,8 +299,10 @@ class _SignUpScreenState extends State<SignUpScreen>
           },
           decoration: InputDecoration(
             labelText: 'Password',
-            prefixIcon:
-                const Icon(Icons.lock_outline, color: Color(0xFF4CAF50)),
+            prefixIcon: const Icon(
+              Icons.lock_outline,
+              color: Color(0xFF4CAF50),
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -318,8 +320,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFF4CAF50), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
             ),
             filled: true,
             fillColor: Colors.grey[50],
@@ -391,9 +392,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             });
           },
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.grey[50],
       ),
@@ -473,8 +472,9 @@ class _SignUpScreenState extends State<SignUpScreen>
     } else if (password.length < 8) {
       strength = "Fair";
       color = Colors.orange;
-    } else if (RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$')
-        .hasMatch(password)) {
+    } else if (RegExp(
+      r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$',
+    ).hasMatch(password)) {
       strength = "Strong";
       color = Colors.green;
     } else {
@@ -514,9 +514,9 @@ class _SignUpScreenState extends State<SignUpScreen>
       try {
         final userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
+              email: emailController.text.trim(),
+              password: passwordController.text.trim(),
+            );
 
         final uid = userCredential.user!.uid;
 
@@ -533,12 +533,14 @@ class _SignUpScreenState extends State<SignUpScreen>
         });
 
         if (widget.role == 'collector') {
+          if (!mounted) return;
           Navigator.pushNamed(
             context,
             AppRoutes.collectorHome,
             arguments: {'role': 'collector'},
           );
         } else {
+          if (!mounted) return;
           Navigator.pushNamed(
             context,
             AppRoutes.home,

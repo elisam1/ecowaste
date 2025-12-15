@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 
 class SummaryCardsRow extends StatelessWidget {
   final String collectorId;
@@ -175,9 +176,7 @@ class MissedRequestsSummaryCard extends StatelessWidget {
         if (snapshot.hasError) {
           count = 'Err';
         } else if (snapshot.hasData) {
-          print(
-            'DEBUG: Total pending/in_progress/accepted requests found: ${snapshot.data!.docs.length}',
-          );
+
 
           final missedDocs = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -199,7 +198,7 @@ class MissedRequestsSummaryCard extends StatelessWidget {
             return false;
           }).toList();
 
-          print('DEBUG: Missed requests: ${missedDocs.length}');
+
           count = missedDocs.length.toString();
         }
 
@@ -228,7 +227,7 @@ Widget _buildSummaryCard({
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withValues(alpha: 0.1),
           spreadRadius: 1,
           blurRadius: 4,
           offset: const Offset(0, 2),
@@ -241,7 +240,7 @@ Widget _buildSummaryCard({
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -260,3 +259,6 @@ Widget _buildSummaryCard({
     ),
   );
 }
+
+
+

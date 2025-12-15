@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/service/greetings.dart';
@@ -56,7 +56,7 @@ class _CollectorMainScreenState extends State<CollectorMainScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, -2),
@@ -253,7 +253,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
           ),
           SizedBox(height: 8),
           Text(
-            'GH₵ 245.00',
+            'GHâ‚µ 245.00',
             style: TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -272,7 +272,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     Text(
-                      'GH₵ 1,240',
+                      'GHâ‚µ 1,240',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -291,7 +291,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     Text(
-                      'GH₵ 4,890',
+                      'GHâ‚µ 4,890',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -365,7 +365,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 4,
               offset: const Offset(0, 2),
@@ -377,7 +377,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 20),
@@ -406,7 +406,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         'time': '2 hours ago',
         'status': 'Completed',
         'items': 3,
-        'earning': 'GH₵ 45',
+        'earning': 'GHâ‚µ 45',
       },
       {
         'id': '#P002',
@@ -414,7 +414,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         'time': '4 hours ago',
         'status': 'Completed',
         'items': 2,
-        'earning': 'GH₵ 30',
+        'earning': 'GHâ‚µ 30',
       },
       {
         'id': '#P003',
@@ -422,7 +422,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         'time': '6 hours ago',
         'status': 'Completed',
         'items': 5,
-        'earning': 'GH₵ 75',
+        'earning': 'GHâ‚µ 75',
       },
     ];
 
@@ -440,7 +440,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 4,
                 offset: const Offset(0, 2),
@@ -452,7 +452,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -521,3 +521,4 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
     );
   }
 }
+

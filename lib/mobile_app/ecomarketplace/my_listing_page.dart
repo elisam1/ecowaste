@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // my_listings_screen.dart
 // ==========================================
 
@@ -97,7 +97,7 @@ class MyListingsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -149,7 +149,7 @@ class MyListingsScreen extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: _getConditionColor(
                                     data['condition'],
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -368,13 +368,14 @@ class MyListingsScreen extends StatelessWidget {
   }
 
   Future<void> _deleteItem(BuildContext context, String itemId) async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await FirebaseFirestore.instance
           .collection('marketplace_items')
           .doc(itemId)
           .delete();
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Item deleted successfully'),
           backgroundColor: Colors.green,
@@ -382,7 +383,7 @@ class MyListingsScreen extends StatelessWidget {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Failed to delete item'),
           backgroundColor: Colors.red,
@@ -397,13 +398,14 @@ class MyListingsScreen extends StatelessWidget {
     String itemId,
     String status,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       await FirebaseFirestore.instance
           .collection('marketplace_items')
           .doc(itemId)
           .update({'status': status, 'updatedAt': Timestamp.now()});
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Item marked as ${status}'),
           backgroundColor: Colors.green,
@@ -411,7 +413,7 @@ class MyListingsScreen extends StatelessWidget {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Failed to update item'),
           backgroundColor: Colors.red,

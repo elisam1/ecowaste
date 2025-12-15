@@ -1,9 +1,8 @@
-// item_detail_screen.dart (UPDATED WITH SELLER FALLBACK LOGIC)
+﻿// item_detail_screen.dart (UPDATED WITH SELLER FALLBACK LOGIC)
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/mobile_app/ecomarketplace/buyerform.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ItemDetailScreen extends StatefulWidget {
@@ -32,11 +31,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     _checkIfFavorite();
   }
 
-  // 🔁 Updated here to try users first, then collectors
+  // ðŸ” Updated here to try users first, then collectors
   Future<void> _loadOwnerData() async {
     final ownerId = widget.itemData['ownerId'];
     if (ownerId == null) {
-      print('Missing ownerId');
       setState(() => isLoadingOwner = false);
       return;
     }
@@ -89,9 +87,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       setState(() {
         isFavorite = favoriteDoc.exists;
       });
-    } catch (e) {
-      print('Error checking favorite status: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _toggleFavorite() async {
@@ -359,7 +355,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
-                  BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 8),
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                  ),
                 ],
               ),
               child: ElevatedButton.icon(
@@ -475,7 +474,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
+                          color: Colors.blue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -522,7 +521,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

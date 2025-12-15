@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
@@ -393,6 +393,7 @@ class _CollectorSignup extends State<CollectorSignup>
 
         setState(() => _isLoading = false);
 
+        if (!mounted) return;
         Navigator.pushNamed(
           context,
           AppRoutes.collectorHome,

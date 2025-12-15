@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -160,8 +160,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -170,7 +170,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       child: Column(
         children: [
           Text(
-            '🏆 Top Performers',
+            'ðŸ† Top Performers',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -233,7 +233,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(color: color, width: 3),
               ),
@@ -271,7 +271,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -291,7 +291,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [color.withOpacity(0.8), color],
+              colors: [color.withValues(alpha: 0.8), color],
             ),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8),
@@ -320,8 +320,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -333,7 +333,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: _getRankColor(rank).withOpacity(0.2),
+              color: _getRankColor(rank).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: _getRankColor(rank), width: 2),
             ),
@@ -533,3 +533,4 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 //     );
 //   }
 // }
+

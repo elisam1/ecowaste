@@ -32,4 +32,6 @@ abstract class AppRoutes {
   static const collectormapscreen = '/collectormapscreen';
   static const pickuphistory = '/pickuphistory';
   static const String weeklyScheduling = '/weekly-scheduling';
+  static const settings = '/settings';
+  static const advancedFeatures = '/advanced-features';
 }

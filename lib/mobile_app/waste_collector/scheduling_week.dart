@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+
 
 class WeeklySchedulingPage extends StatefulWidget {
   final String collectorId;
@@ -38,7 +39,7 @@ class WeeklySchedulingPage extends StatefulWidget {
 class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
     with TickerProviderStateMixin {
   /// Anchor date determines which week we're showing.
-  /// The UI will show the Sunday→Saturday that contains this anchor.
+  /// The UI will show the Sundayâ†’Saturday that contains this anchor.
   DateTime _anchorDate = _todayDateOnly();
 
   late AnimationController _slideController;
@@ -80,7 +81,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
     ).subtract(Duration(days: daysFromSunday));
   }
 
-  /// Sunday → Saturday dates for the week containing [_anchorDate]
+  /// Sunday â†’ Saturday dates for the week containing [_anchorDate]
   List<DateTime> get _weekDates {
     final start = _sundayOf(_anchorDate);
     return List.generate(7, (i) => start.add(Duration(days: i)));
@@ -95,9 +96,9 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
     final b = dates.last;
     final sameMonth = a.month == b.month && a.year == b.year;
     if (sameMonth) {
-      return '${DateFormat('d').format(a)}–${DateFormat('d MMM, yyyy').format(b)}';
+      return '${DateFormat('d').format(a)}â€“${DateFormat('d MMM, yyyy').format(b)}';
     } else {
-      return '${DateFormat('d MMM').format(a)} – ${DateFormat('d MMM, yyyy').format(b)}';
+      return '${DateFormat('d MMM').format(a)} â€“ ${DateFormat('d MMM, yyyy').format(b)}';
     }
   }
 
@@ -153,7 +154,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
         'schedule': currentSchedule,
       }, SetOptions(merge: true));
     } catch (e) {
-      print('Error updating schedule: $e');
+
       // Fallback to the original method if there's an error
       await _collectorDoc.set({
         'schedule': {key: towns},
@@ -241,10 +242,12 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
 
       // Close loading dialog
       if (context.mounted) {
+        if (!mounted) return;
         Navigator.of(context).pop();
       }
 
       // Show success message
+      if (!mounted) return;
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -264,10 +267,12 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
         await _updateTownsForDate(date, []);
       }
     } catch (e) {
+      if (!mounted) return;
       // Close loading dialog
       if (context.mounted) {
         Navigator.of(context).pop();
       }
+if (!mounted) return;
 
       // Show error message
       if (context.mounted) {
@@ -455,7 +460,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Card(
         elevation: isToday ? 6 : 2,
-        shadowColor: isToday ? Colors.blue.withOpacity(0.3) : Colors.black26,
+        shadowColor: isToday ? Colors.blue.withValues(alpha: 0.3) : Colors.black26,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
@@ -505,7 +510,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
                                       : isWeekend
                                       ? Colors.amber
                                       : Colors.grey)
-                                  .withOpacity(0.3),
+                                  .withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -771,7 +776,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -817,7 +822,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
                               border: Border.all(color: Colors.blue.shade200),
                             ),
                             child: Text(
-                              'Sunday – Saturday',
+                              'Sunday â€“ Saturday',
                               style: TextStyle(
                                 color: Colors.blue.shade700,
                                 fontSize: 12,
@@ -952,3 +957,10 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
     );
   }
 }
+
+
+
+
+
+
+

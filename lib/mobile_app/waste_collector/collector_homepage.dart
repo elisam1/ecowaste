@@ -272,8 +272,12 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                   child: Switch(
                     value: isActive,
                     onChanged: _updateActiveStatus,
-                    activeColor: Colors.green,
-                    activeTrackColor: Colors.green.withValues(alpha: 0.3),
+                    thumbColor: WidgetStateProperty.all(Colors.green),
+                    trackColor: WidgetStateProperty.resolveWith(
+                      (states) => isActive
+                          ? Colors.green.withValues(alpha: 0.3)
+                          : Colors.grey[300],
+                    ),
                     inactiveThumbColor: Colors.grey[400],
                     inactiveTrackColor: Colors.grey[300],
                   ),

@@ -1,7 +1,5 @@
-// import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
 import 'package:intl/intl.dart';
 
 class PickupHistoryScreen extends StatefulWidget {
@@ -65,8 +63,7 @@ class _PickupHistoryScreenState extends State<PickupHistoryScreen>
         stream: _firestore
             .collection('pickup_requests')
             .where('userId', isEqualTo: widget.userId)
-            .where('status', isEqualTo: 'completed')
-            .orderBy('userConfirmedAt', descending: true)
+            .limit(100)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,7 +180,29 @@ class _PickupHistoryScreenState extends State<PickupHistoryScreen>
             );
           }
 
-          final requests = snapshot.data!.docs;
+          final allRequests = snapshot.data!.docs;
+          final requests =
+              allRequests.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return data['status'] == 'completed';
+              }).toList()..sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+
+                final aTime =
+                    aData['userConfirmedAt'] ??
+                    aData['updatedAt'] ??
+                    aData['createdAt'];
+                final bTime =
+                    bData['userConfirmedAt'] ??
+                    bData['updatedAt'] ??
+                    bData['createdAt'];
+
+                if (aTime is Timestamp && bTime is Timestamp) {
+                  return bTime.compareTo(aTime); // Descending order
+                }
+                return 0;
+              });
 
           return AnimatedList(
             padding: const EdgeInsets.all(16),
@@ -406,7 +425,7 @@ class _HistoryCardState extends State<HistoryCard>
                         ),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.green.shade800.withOpacity(0.3),
+                          color: Colors.green.shade800.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -530,7 +549,8 @@ class _HistoryCardState extends State<HistoryCard>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Chat button (only if collector is assigned and not cancelled)
-                    if (collectorId != null && widget.requestData['status'] != 'cancelled')
+                    if (collectorId != null &&
+                        widget.requestData['status'] != 'cancelled')
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
@@ -619,7 +639,7 @@ class _HistoryCardState extends State<HistoryCard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: iconColor),
@@ -914,7 +934,7 @@ class _HistoryCardState extends State<HistoryCard>
 //                     Text('Request ID: ${historyDocs[index].id}'),
 //                     if (updatedAt != null)
 //                       Text(
-//                         'Completed On: ${DateFormat('MMM dd, yyyy – hh:mm a').format(updatedAt)}',
+//                         'Completed On: ${DateFormat('MMM dd, yyyy â€“ hh:mm a').format(updatedAt)}',
 //                       ),
 //                     const SizedBox(height: 8),
 //                     Text('Location: ${data['userTown'] ?? 'Unknown'}'),

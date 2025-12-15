@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
@@ -20,12 +20,13 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<CollectorProvider>(
+    // Fetch data after the first frame to ensure context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CollectorProvider>(
         context,
         listen: false,
-      ).fetchCollectorData(),
-    );
+      ).fetchCollectorData();
+    });
   }
 
   @override
@@ -170,7 +171,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
                                       ),
                                     ),
                                     Text(
-                                      ' • 2 years experience',
+                                      ' â€¢ 2 years experience',
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontSize: 12,
@@ -272,9 +273,9 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
   Widget _buildLogoutTile() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
+        color: Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withOpacity(0.2)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -282,7 +283,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.logout, color: Colors.red, size: 24),
@@ -313,7 +314,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 6,
             offset: const Offset(0, 2),
@@ -343,7 +344,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 6,
             offset: const Offset(0, 2),

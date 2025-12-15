@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
@@ -20,7 +20,6 @@ class CollectorLocationService {
   /// Call this when collector accepts a pickup request or when status changes to in_progress
   Future<void> startLocationTracking(String collectorId) async {
     if (_isTracking && _currentCollectorId == collectorId) {
-      print('Location tracking already active for collector: $collectorId');
       return;
     }
 
@@ -28,8 +27,6 @@ class CollectorLocationService {
 
     _currentCollectorId = collectorId;
     _isTracking = true;
-
-    print('Starting location tracking for collector: $collectorId');
 
     try {
       // Check permissions
@@ -56,7 +53,6 @@ class CollectorLocationService {
       // Also set up periodic updates as backup
       _startPeriodicUpdates(collectorId);
     } catch (e) {
-      print('Error starting location tracking: $e');
       _isTracking = false;
       _currentCollectorId = null;
       rethrow;
@@ -74,9 +70,7 @@ class CollectorLocationService {
           (Position position) {
             _updateCollectorLocation(collectorId, position);
           },
-          onError: (error) {
-            print('Location stream error: $error');
-          },
+          onError: (error) {},
         );
   }
 
@@ -91,7 +85,7 @@ class CollectorLocationService {
           );
           _updateCollectorLocation(collectorId, position);
         } catch (e) {
-          print('Periodic location update error: $e');
+          print('Error getting current position for location tracking: $e');
         }
       },
     );
@@ -114,21 +108,13 @@ class CollectorLocationService {
             'timestamp': FieldValue.serverTimestamp(),
             'isActive': true,
           }, SetOptions(merge: true));
-
-      print(
-        'Updated location for collector $collectorId: ${position.latitude}, ${position.longitude}',
-      );
-    } catch (e) {
-      print('Error updating collector location: $e');
-    }
+    } catch (e) {}
   }
 
   /// Stop location tracking
   /// Call this when all pickup requests are completed or collector goes offline
   Future<void> stopLocationTracking() async {
     if (!_isTracking) return;
-
-    print('Stopping location tracking for collector: $_currentCollectorId');
 
     _locationTimer?.cancel();
     _positionStream?.cancel();
@@ -143,9 +129,7 @@ class CollectorLocationService {
               'isActive': false,
               'lastActiveAt': FieldValue.serverTimestamp(),
             });
-      } catch (e) {
-        print('Error marking collector as inactive: $e');
-      }
+      } catch (e) {}
     }
   }
 }

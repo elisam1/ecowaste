@@ -1,10 +1,9 @@
-// Enhanced Beautiful WastePickupFormUpdated with Today/Schedule Options
+﻿// Enhanced Beautiful WastePickupFormUpdated with Today/Schedule Options
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/mobile_app/user_screen/user_request_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'dart:math'; // Added for Random
@@ -199,7 +198,9 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
             minTimeToday.hour * 60 + minTimeToday.minute;
 
         if (pickedMinutes < minTimeTodayMinutes || pickedMinutes > maxMinutes) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          if (!mounted) return;
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.showSnackBar(
             SnackBar(
               backgroundColor: Colors.red,
               content: Text(
@@ -210,6 +211,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
           return;
         }
       } else {
+        if (!mounted) return;
         // For scheduled pickup, check normal business hours
         if (pickedMinutes < minMinutes || pickedMinutes > maxMinutes) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -255,12 +257,13 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
 
       setState(() {
         _currentPosition = position;
-        _locationStatus = "📍 Location captured successfully";
+        _locationStatus = "ðŸ“ Location captured successfully";
         _isLocationLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _locationStatus = "❌ Error: ${e.toString()}";
+        _locationStatus = "âŒ Error: ${e.toString()}";
         _isLocationLoading = false;
       });
 
@@ -320,7 +323,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         final random = Random();
         final randomIndex = random.nextInt(_nearbyCollectors.length);
         final selectedCollector = _nearbyCollectors[randomIndex];
-        
+
         setState(() {
           _selectedCollectorId = selectedCollector['id'];
         });
@@ -397,8 +400,10 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
           .get();
 
       if (!userDoc.exists) {
-        Navigator.of(context).pop();
-        _showErrorSnackBar('User data not found');
+        if (mounted) {
+          Navigator.of(context).pop();
+          _showErrorSnackBar('User data not found');
+        }
         return;
       }
 
@@ -472,7 +477,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
           await FirebaseFirestore.instance.collection('notifications').add({
             'userId': collectorId,
             'type': 'new_pickup_request',
-            'title': '🗑️ New Pickup Request',
+            'title': 'ðŸ—‘ï¸ New Pickup Request',
             'message':
                 '${userName} has requested a pickup in ${_townController.text.trim()}',
             'data': {
@@ -487,16 +492,18 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
             'isRead': false,
             'createdAt': FieldValue.serverTimestamp(),
           });
-        } catch (e) {
-          print('Error creating pickup request notification: $e');
-        }
+        } catch (e) {}
       }
 
-      Navigator.of(context).pop();
-      _showSuccessDialog();
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showSuccessDialog();
+      }
     } catch (e) {
-      Navigator.of(context).pop();
-      _showErrorSnackBar('Failed to submit request: ${e.toString()}');
+      if (mounted) {
+        Navigator.of(context).pop();
+        _showErrorSnackBar('Failed to submit request: ${e.toString()}');
+      }
     }
   }
 
@@ -591,7 +598,8 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
     // Simulate payment processing delay
     await Future.delayed(const Duration(seconds: 2));
 
-    // Close loading dialog
+    // Close loading dialog (ensure widget still mounted)
+    if (!mounted) return;
     Navigator.of(context).pop();
 
     // Show payment success dialog
@@ -858,7 +866,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
                         height: 200,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
@@ -868,7 +876,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
                       child: Icon(
                         Icons.recycling,
                         size: 40,
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                       ),
                     ),
                   ],
@@ -978,7 +986,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1039,7 +1047,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1251,7 +1259,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1449,7 +1457,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1572,7 +1580,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1839,7 +1847,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -2026,7 +2034,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
                       ),
                     ),
                     Text(
-                      '${_selectedBinCount} × \$${_pricePerBin.toStringAsFixed(2)}',
+                      '${_selectedBinCount} Ã— \$${_pricePerBin.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -2055,7 +2063,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.shade600.withOpacity(0.3),
+            color: Colors.green.shade600.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -2092,7 +2100,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
             ),
             const SizedBox(height: 4),
             Text(
-              'Pay \$${totalCost.toStringAsFixed(2)} • ${_selectedBinCount} bin${_selectedBinCount > 1 ? 's' : ''}',
+              'Pay \$${totalCost.toStringAsFixed(2)} â€¢ ${_selectedBinCount} bin${_selectedBinCount > 1 ? 's' : ''}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,

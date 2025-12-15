@@ -99,7 +99,7 @@ class SortScoreProvider with ChangeNotifier {
   void _startAutoGeneration(String userId) {
     // Cancel existing timer if any
     _sortScoreTimer?.cancel();
-    
+
     // Generate new sort score every 5 minutes (300 seconds)
     _sortScoreTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _generateRandomSortScore(userId);
@@ -113,7 +113,7 @@ class SortScoreProvider with ChangeNotifier {
           .collection('users')
           .doc(userId)
           .get();
-      
+
       if (userDoc.exists && userDoc.data()?['sortScore'] != null) {
         // User already has a sort score, load it
         _sortScore = userDoc.data()!['sortScore'];
@@ -134,13 +134,28 @@ class SortScoreProvider with ChangeNotifier {
       final random = Random();
       _sortScore = 100 + random.nextInt(9900); // Random between 100 and 9999
 
-      await FirebaseFirestore.instance
+      // Check if user document exists before updating
+      final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
-          .update({
-        'sortScore': _sortScore,
-        'lastSortScoreUpdate': FieldValue.serverTimestamp(),
-      });
+          .get();
+
+      if (userDoc.exists) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
+              'sortScore': _sortScore,
+              'lastSortScoreUpdate': FieldValue.serverTimestamp(),
+            });
+      } else {
+        // Create the document if it doesn't exist
+        await FirebaseFirestore.instance.collection('users').doc(userId).set({
+          'sortScore': _sortScore,
+          'lastSortScoreUpdate': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
       notifyListeners();
     } catch (e) {
       debugPrint("Error generating random sort score: $e");

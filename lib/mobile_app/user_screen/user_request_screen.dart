@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
@@ -53,7 +53,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -93,7 +93,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
             .where(
               'status',
               whereNotIn: ['completed'],
-            ) // 👈 this line filters out completed
+            ) // ðŸ‘ˆ this line filters out completed
             .orderBy('createdAt', descending: true)
             .snapshots(),
 
@@ -663,7 +663,7 @@ class _RequestCardState extends State<RequestCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: textColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -696,7 +696,7 @@ class _RequestCardState extends State<RequestCard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: iconColor),
@@ -880,3 +880,4 @@ class _RequestCardState extends State<RequestCard>
     );
   }
 }
+

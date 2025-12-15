@@ -1,4 +1,4 @@
-// // Enhanced Beautiful WastePickupFormUpdated with Auto-Assignment
+﻿// // Enhanced Beautiful WastePickupFormUpdated with Auto-Assignment
 // import 'dart:async';
 
 // import 'package:cloud_firestore/cloud_firestore.dart';
@@ -203,12 +203,12 @@
 
 //       setState(() {
 //         _currentPosition = position;
-//         _locationStatus = "📍 Location captured successfully";
+//         _locationStatus = "ðŸ“ Location captured successfully";
 //         _isLocationLoading = false;
 //       });
 //     } catch (e) {
 //       setState(() {
-//         _locationStatus = "❌ Error: ${e.toString()}";
+//         _locationStatus = "âŒ Error: ${e.toString()}";
 //         _isLocationLoading = false;
 //       });
 
@@ -611,7 +611,7 @@
 //                         height: 200,
 //                         decoration: BoxDecoration(
 //                           shape: BoxShape.circle,
-//                           color: Colors.white.withOpacity(0.1),
+//                           color: Colors.white.withValues(alpha: 0.1),
 //                         ),
 //                       ),
 //                     ),
@@ -621,7 +621,7 @@
 //                       child: Icon(
 //                         Icons.recycling,
 //                         size: 40,
-//                         color: Colors.white.withOpacity(0.3),
+//                         color: Colors.white.withValues(alpha: 0.3),
 //                       ),
 //                     ),
 //                   ],
@@ -718,7 +718,7 @@
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 10,
 //             offset: const Offset(0, 5),
 //           ),
@@ -812,7 +812,7 @@
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 10,
 //             offset: const Offset(0, 5),
 //           ),
@@ -933,7 +933,7 @@
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 10,
 //             offset: const Offset(0, 5),
 //           ),
@@ -1056,7 +1056,7 @@
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 10,
 //             offset: const Offset(0, 5),
 //           ),
@@ -1293,7 +1293,7 @@
 //         ),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.green.shade600.withOpacity(0.3),
+//             color: Colors.green.shade600.withValues(alpha: 0.3),
 //             blurRadius: 12,
 //             offset: const Offset(0, 6),
 //           ),
@@ -1327,3 +1327,4 @@
 //     );
 //   }
 // }
+
