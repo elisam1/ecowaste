@@ -1,8 +1,9 @@
 ﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 //import 'package:flutter_application_1/mobile_app/ecomarketplace/homescreen.dart';
 
-import 'package:flutter_application_1/mobile_app/user_screen/new_homepage.dart';
+import 'package:flutter_application_1/mobile_app/user_screen/home_redesign.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/profile_screen.dart';
 
 import 'package:flutter_application_1/mobile_app/user_screen/user_request_screen.dart';
@@ -24,12 +25,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> screens = [
       UserRequestsScreen(userId: FirebaseAuth.instance.currentUser?.uid ?? ''),
-
-      const HomePage(),
+      const RedesignedHomePage(),
       const ProfileScreen(),
     ];
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBF9),
+      backgroundColor: AppColors.background,
 
       body: screens[myIndex],
       bottomNavigationBar: Container(
@@ -37,27 +37,33 @@ class _HomeScreenState extends State<HomeScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, -6),
             ),
           ],
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
-          selectedItemColor: const Color(0xFF2E7D32),
-          unselectedItemColor: Colors.grey.shade600,
+          selectedItemColor: AppColors.indigo,
+          unselectedItemColor: AppColors.textSecondary,
           currentIndex: myIndex,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+          selectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: AppColors.indigo.withValues(alpha: 0.9),
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary.withValues(alpha: 0.9),
+          ),
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.local_shipping_outlined),
-              activeIcon: Icon(Icons.local_shipping),
+              icon: Icon(Icons.list_alt_outlined),
+              activeIcon: Icon(Icons.list_alt),
               label: 'Pickup',
             ),
-
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
@@ -79,4 +85,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

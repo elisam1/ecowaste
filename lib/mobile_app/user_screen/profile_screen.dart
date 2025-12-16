@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 import 'package:logger/logger.dart';
@@ -83,7 +84,15 @@ class _ProfileScreenState extends State<ProfileScreen>
       appBar: AppBar(
         automaticallyImplyLeading: false,
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color(0xFF2E7D32),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.navy, AppColors.indigo, AppColors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         centerTitle: true,
         title: const Text(
           'My Profile',
@@ -100,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF4CAF50)],
+            colors: [AppColors.navy, AppColors.indigo, AppColors.blue],
             stops: [0.0, 0.5, 1.0],
           ),
         ),
@@ -203,13 +212,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                    colors: [AppColors.indigo, AppColors.blue],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      color: AppColors.indigo.withValues(alpha: 0.25),
+                      blurRadius: 22,
+                      offset: const Offset(0, 12),
                     ),
                   ],
                 ),
@@ -253,14 +262,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1B5E20),
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.blue,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.check, color: Colors.white, size: 16),
@@ -291,25 +300,25 @@ class _ProfileScreenState extends State<ProfileScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                  const Color(0xFF2E7D32).withValues(alpha: 0.1),
+                  AppColors.indigo.withValues(alpha: 0.12),
+                  AppColors.blue.withValues(alpha: 0.08),
                 ],
               ),
               borderRadius: BorderRadius.circular(25),
               border: Border.all(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                color: AppColors.blue.withValues(alpha: 0.35),
                 width: 1.5,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('ðŸŒ±', style: TextStyle(fontSize: 18)),
+                const Text('🌍', style: TextStyle(fontSize: 18)),
                 const SizedBox(width: 8),
                 const Text(
                   'Eco Champion',
                   style: TextStyle(
-                    color: Color(0xFF1B5E20),
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -321,7 +330,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50),
+                    color: AppColors.blue,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -365,14 +374,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                       children: [
                         CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF4CAF50),
+                            AppColors.indigo,
                           ),
                         ),
                         SizedBox(height: 16),
                         Text(
                           'Loading stats...',
                           style: TextStyle(
-                            color: Color(0xFF1B5E20),
+                            color: AppColors.textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -390,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       title: 'Total Pickups',
                       value: totalPickups.toString(),
                       icon: Icons.local_shipping_rounded,
-                      color: const Color(0xFF2196F3),
+                      color: AppColors.indigo,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -399,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       title: 'Sort Score',
                       value: sortScore.toString(),
                       icon: Icons.eco_rounded,
-                      color: const Color(0xFF4CAF50),
+                      color: AppColors.blue,
                     ),
                   ),
                 ],
@@ -439,21 +448,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                     horizontal: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: AppColors.indigo.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.blue.withValues(alpha: 0.3),
+                      color: AppColors.indigo.withOpacity(0.35),
                     ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.refresh, color: Colors.blue, size: 16),
+                      Icon(Icons.refresh, color: AppColors.indigo, size: 16),
                       SizedBox(width: 4),
                       Text(
                         'Refresh Stats',
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: AppColors.indigo,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -482,19 +491,19 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -541,7 +550,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('New sort score generated!'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.indigo,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -554,14 +563,14 @@ class _ProfileScreenState extends State<ProfileScreen>
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+              colors: [AppColors.indigo, AppColors.blue],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                color: AppColors.indigo.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -593,7 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         'icon': Icons.history_rounded,
         'title': 'Pickup History',
         'subtitle': 'View your past waste collections',
-        'color': const Color(0xFF9C27B0),
+        'color': AppColors.indigo,
         'onTap': () {
           Navigator.pushNamed(context, AppRoutes.pickuphistory);
           // Navigate to pickup history
@@ -603,14 +612,14 @@ class _ProfileScreenState extends State<ProfileScreen>
         'icon': Icons.help_outline_rounded,
         'title': 'About Us',
         'subtitle': 'Learn more about SortCycle',
-        'color': const Color(0xFF4CAF50),
+        'color': AppColors.blue,
         'onTap': () => Navigator.pushNamed(context, AppRoutes.aboutus),
       },
       {
         'icon': Icons.settings_outlined,
         'title': 'Settings',
         'subtitle': 'App preferences and privacy',
-        'color': const Color(0xFF607D8B),
+        'color': AppColors.sky,
         'onTap': () {
           // Navigate to settings
           Navigator.pushNamed(context, AppRoutes.settings);
@@ -628,7 +637,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1B5E20),
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 16),
@@ -662,12 +671,12 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.grey.withOpacity(0.08)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -678,7 +687,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -688,7 +697,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF1B5E20),
+            color: AppColors.textPrimary,
           ),
         ),
         subtitle: Text(
@@ -698,7 +707,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         trailing: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.12),
             shape: BoxShape.circle,
           ),
           child: Icon(Icons.arrow_forward_ios, size: 14, color: color),
@@ -713,12 +722,12 @@ class _ProfileScreenState extends State<ProfileScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.red.withValues(alpha: 0.05),
-            Colors.red.withValues(alpha: 0.02),
+            AppColors.danger.withOpacity(0.06),
+            AppColors.danger.withOpacity(0.02),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.danger.withOpacity(0.25)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -729,7 +738,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
+            color: AppColors.danger.withOpacity(0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.logout_rounded, color: Colors.red, size: 24),
@@ -749,7 +758,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         trailing: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
+            color: AppColors.danger.withOpacity(0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -773,7 +782,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: AppColors.danger.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.logout, color: Colors.red, size: 20),
@@ -783,7 +792,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               'Confirm Logout',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B5E20),
+                color: AppColors.textPrimary,
                 fontSize: 18,
               ),
             ),
@@ -848,7 +857,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                const CircularProgressIndicator(color: AppColors.indigo),
                 const SizedBox(height: 16),
                 Text(
                   'Logging out...',

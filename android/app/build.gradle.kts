@@ -67,6 +67,35 @@ dependencies {
     implementation("com.google.mlkit:object-detection:17.0.2")
     // ✅ Required for Java 8+ APIs used in flutter_local_notifications
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    
+    // Constrain androidx versions to be compatible with AGP 8.7.3
+    constraints {
+        implementation("androidx.browser:browser") {
+            version {
+                strictly("1.8.0")
+            }
+        }
+        implementation("androidx.activity:activity") {
+            version {
+                strictly("1.10.0")
+            }
+        }
+        implementation("androidx.activity:activity-ktx") {
+            version {
+                strictly("1.10.0")
+            }
+        }
+        implementation("androidx.core:core") {
+            version {
+                strictly("1.16.0")
+            }
+        }
+        implementation("androidx.core:core-ktx") {
+            version {
+                strictly("1.16.0")
+            }
+        }
+    }
 }
 
 flutter {

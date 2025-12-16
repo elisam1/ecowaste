@@ -29,44 +29,55 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
   ];
 
   Stream<QuerySnapshot> _getItemsStream() {
-    Query query = FirebaseFirestore.instance
+    return FirebaseFirestore.instance
         .collection('marketplace_items')
         .where('isActive', isEqualTo: true)
-        .orderBy('createdAt', descending: true);
-
-    if (selectedCategory != 'All') {
-      query = query.where('category', isEqualTo: selectedCategory);
-    }
-
-    return query.snapshots();
+        .orderBy('createdAt', descending: true)
+        .limit(50)
+        .snapshots();
   }
 
   List<DocumentSnapshot> _filterItems(List<DocumentSnapshot> items) {
-    if (searchQuery.isEmpty) return items;
+    var filtered = items;
 
-    return items.where((item) {
-      final data = item.data() as Map<String, dynamic>;
-      final name = (data['name'] ?? '').toString().toLowerCase();
-      final description = (data['description'] ?? '').toString().toLowerCase();
-      final location = (data['location'] ?? '').toString().toLowerCase();
+    // Filter by category client-side
+    if (selectedCategory != 'All') {
+      filtered = filtered.where((item) {
+        final data = item.data() as Map<String, dynamic>;
+        return data['category'] == selectedCategory;
+      }).toList();
+    }
+
+    // Filter by search query
+    if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
+      filtered = filtered.where((item) {
+        final data = item.data() as Map<String, dynamic>;
+        final name = (data['name'] ?? '').toString().toLowerCase();
+        final description = (data['description'] ?? '')
+            .toString()
+            .toLowerCase();
+        final location = (data['location'] ?? '').toString().toLowerCase();
 
-      return name.contains(query) ||
-          description.contains(query) ||
-          location.contains(query);
-    }).toList();
+        return name.contains(query) ||
+            description.contains(query) ||
+            location.contains(query);
+      }).toList();
+    }
+
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         centerTitle: true,
         //automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 34, 125, 69),
-        foregroundColor: const Color.fromARGB(221, 250, 249, 249),
+        backgroundColor: const Color(0xFF30489C),
+        foregroundColor: Colors.white,
         title: const Text(
           'EcoMarketplace',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
@@ -86,7 +97,7 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
                 value: 'add_item',
                 child: Row(
                   children: [
-                    Icon(Icons.add, color: Colors.green),
+                    Icon(Icons.add, color: Color(0xFF30489C)),
                     SizedBox(width: 12),
                     Text('Add Item'),
                   ],
@@ -96,7 +107,7 @@ class _MarketHomeScreen extends State<MarketHomeScreen> {
                 value: 'my_listings',
                 child: Row(
                   children: [
-                    Icon(Icons.list, color: Colors.blue),
+                    Icon(Icons.list, color: Color(0xFF4C6FFF)),
                     SizedBox(width: 12),
                     Text('My Listings'),
                   ],

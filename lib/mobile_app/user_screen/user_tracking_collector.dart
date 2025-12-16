@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -593,13 +594,13 @@ class _UserCollectorTrackingScreenState
   Color _getStatusColorValue() {
     switch (_requestStatus) {
       case 'in_progress':
-        return Colors.blue;
+        return AppColors.blue;
       case 'completed':
-        return Colors.green;
+        return AppColors.success;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.danger;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -627,7 +628,7 @@ class _UserCollectorTrackingScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Track Collector'),
-        backgroundColor: _getStatusColorValue(),
+        backgroundColor: AppColors.indigo,
         foregroundColor: Colors.white,
         actions: [
           if (_collectorPhone != null)
@@ -643,7 +644,9 @@ class _UserCollectorTrackingScreenState
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(AppColors.indigo),
+                  ),
                   SizedBox(height: 16),
                   Text('Loading tracking data...'),
                 ],
@@ -679,106 +682,150 @@ class _UserCollectorTrackingScreenState
               children: [
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target: _userLocation ?? const LatLng(6.6730, -1.5715),
+                    target: _userLocation ?? const LatLng(0, 0),
                     zoom: 14,
                   ),
                   markers: _markers,
                   polylines: _polylines,
                   onMapCreated: (controller) {
                     _mapController = controller;
-                    if (_markers.length > 1) {
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        _fitMarkersInView();
-                      });
-                    }
                   },
-                  zoomControlsEnabled: true,
-                  compassEnabled: true,
-                  mapToolbarEnabled: false,
                 ),
-                // Status and info card
+
                 Positioned(
                   top: 16,
                   left: 16,
                   right: 16,
-                  child: Card(
-                    elevation: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 12,
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  color: _getStatusColorValue(),
-                                  shape: BoxShape.circle,
-                                ),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white,
+                          AppColors.blue.withOpacity(0.08),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: _getStatusColorValue().withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _formatStatus(_requestStatus),
+                              decoration: BoxDecoration(
+                                color: _getStatusColorValue().withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColorValue(),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _formatStatus(_requestStatus),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: _getStatusColorValue(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Spacer(),
+                            if (_collectorPhone != null)
+                              IconButton(
+                                icon: const Icon(Icons.phone),
+                                color: AppColors.indigo,
+                                onPressed: _callCollector,
+                                tooltip: 'Call collector',
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.person,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _collectorName ?? 'Unknown Collector',
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                              const Spacer(),
-                              if (_collectorPhone != null)
-                                IconButton(
-                                  icon: const Icon(Icons.phone),
-                                  onPressed: _callCollector,
-                                  tooltip: 'Call collector',
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
+                            ),
+                          ],
+                        ),
+                        if (_estimatedDistance != null) ...[
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               const Icon(
-                                Icons.person,
+                                Icons.straighten,
                                 size: 16,
-                                color: Colors.grey,
+                                color: AppColors.textSecondary,
                               ),
-                              const SizedBox(width: 4),
-                              Text(_collectorName ?? 'Unknown Collector'),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Distance: $_estimatedDistance',
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
-                          if (_estimatedDistance != null) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.straighten,
-                                  size: 16,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Distance: ${(_estimatedDistance! / 1000).toStringAsFixed(2)} km',
-                                ),
-                              ],
-                            ),
-                          ],
-                          if (_estimatedTime != null) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 16,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 4),
-                                Text('Estimated time: $_estimatedTime'),
-                              ],
-                            ),
-                          ],
                         ],
-                      ),
+                        if (_estimatedTime != null) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.timer,
+                                size: 16,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ETA: $_estimatedTime',
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),

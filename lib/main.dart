@@ -17,6 +17,7 @@ import 'package:flutter_application_1/mobile_app/ecomarketplace/itemdetails.dart
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/provider/notification_provider.dart';
 import 'package:flutter_application_1/mobile_app/provider/theme_provider.dart';
+import 'package:flutter_application_1/mobile_app/service/offline_persistence_service.dart';
 //import 'package:flutter_application_1/mobile_app/provider/sort_score_provider.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 import 'package:flutter_application_1/mobile_app/service/component/leaderboard.dart';
@@ -66,6 +67,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize offline persistence first
+  try {
+    await OfflinePersistenceService().initialize();
+  } catch (e) {
+    print('❌ Failed to initialize offline persistence: $e');
+  }
 
   // Initialize Firebase App Check with error handling
   try {

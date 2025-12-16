@@ -123,10 +123,12 @@ class AdvancedMarketplaceService {
       // Validate bid
       if (bidAmount <= currentBid) return false;
       if (auctionEndTime != null &&
-          auctionEndTime.toDate().isBefore(DateTime.now()))
+          auctionEndTime.toDate().isBefore(DateTime.now())) {
         return false;
-      if (listing['sellerId'] == user.uid)
+      }
+      if (listing['sellerId'] == user.uid) {
         return false; // Can't bid on own listing
+      }
 
       // Update listing with new bid
       await listingRef.update({

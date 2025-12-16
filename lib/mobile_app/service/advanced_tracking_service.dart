@@ -225,7 +225,7 @@ class AdvancedTrackingService {
       });
     } catch (e) {
       debugPrint('Error updating pickup status: $e');
-      throw e;
+      rethrow;
     }
   }
 

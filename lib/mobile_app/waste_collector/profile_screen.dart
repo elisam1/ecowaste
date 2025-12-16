@@ -46,7 +46,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
+                  colors: [Color(0xFF1F2A44), Color(0xFF30489C)],
                 ),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
@@ -443,7 +443,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
           'Confirm Logout',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2E7D32),
+            color: const Color(0xFF30489C),
           ),
         ),
         content: const Text('Are you sure you want to log out?'),
@@ -477,7 +477,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(
-          child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+          child: CircularProgressIndicator(color: Color(0xFF30489C)),
         ),
       );
 

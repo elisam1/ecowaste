@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 import 'package:intl/intl.dart';
 
@@ -37,7 +38,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FFFE),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -53,7 +54,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -68,7 +69,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
             ),
           ),
         ],
-        backgroundColor: const Color(0xFF2E7D32),
+        backgroundColor: const Color(0xFF30489C),
         foregroundColor: Colors.white,
         elevation: 0,
         flexibleSpace: Container(
@@ -76,32 +77,24 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF2E7D32), Color(0xFF388E3C)],
+              colors: [Color(0xFF1F2A44), Color(0xFF30489C)],
             ),
           ),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        // stream: _firestore
-        //     .collection('pickup_requests')
-        //     .where('userId', isEqualTo: widget.userId)
-        //     .orderBy('createdAt', descending: true)
-        //     .snapshots(),
         stream: _firestore
             .collection('pickup_requests')
             .where('userId', isEqualTo: widget.userId)
-            .where(
-              'status',
-              whereNotIn: ['completed'],
-            ) // ðŸ‘ˆ this line filters out completed
             .orderBy('createdAt', descending: true)
+            .limit(25)
             .snapshots(),
 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7D32)),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.indigo),
               ),
             );
           }
@@ -166,9 +159,9 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.green.shade100,
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppColors.indigo.withOpacity(0.08),
+                        blurRadius: 26,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
@@ -178,13 +171,13 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
+                          color: AppColors.indigo.withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.eco_outlined,
+                          Icons.sailing_rounded,
                           size: 64,
-                          color: Colors.green.shade400,
+                          color: AppColors.indigo,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -192,7 +185,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                         'No pickup requests yet',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
-                              color: Colors.green.shade800,
+                              color: AppColors.navy,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -200,7 +193,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                       Text(
                         'Start your journey towards a cleaner environment.\nYour pickup requests will appear here.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                           height: 1.4,
                         ),
                         textAlign: TextAlign.center,
@@ -212,7 +205,69 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
             );
           }
 
-          final requests = snapshot.data!.docs;
+          final requests = snapshot.data!.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final status = data['status'] ?? '';
+            return status != 'completed';
+          }).toList();
+
+          if (requests.isEmpty) {
+            return Center(
+              child: FadeTransition(
+                opacity: _animationController,
+                child: Container(
+                  margin: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.blue.withOpacity(0.14),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.eco_outlined,
+                          size: 64,
+                          color: AppColors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No active pickup requests',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: AppColors.navy,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Start a pickup to see it here. Completed ones are hidden to keep it clean.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
 
           return AnimatedList(
             padding: const EdgeInsets.all(16),
@@ -404,20 +459,26 @@ class _RequestCardState extends State<RequestCard>
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.white, AppColors.mutedSurface],
+            ),
+            borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
                 color: _isPressed
-                    ? Colors.green.shade200
-                    : Colors.grey.shade200,
-                blurRadius: _isPressed ? 12 : 8,
-                offset: const Offset(0, 4),
+                    ? AppColors.indigo.withOpacity(0.18)
+                    : Colors.black.withOpacity(0.04),
+                blurRadius: _isPressed ? 18 : 14,
+                offset: const Offset(0, 10),
               ),
             ],
             border: Border.all(
-              color: _isPressed ? Colors.green.shade300 : Colors.transparent,
-              width: 1,
+              color: _isPressed
+                  ? AppColors.blue.withOpacity(0.45)
+                  : Colors.transparent,
+              width: 1.2,
             ),
           ),
           child: Padding(
@@ -469,7 +530,7 @@ class _RequestCardState extends State<RequestCard>
                   Icons.access_time_rounded,
                   'Pickup Time',
                   DateFormat('MMM dd, yyyy - hh:mm a').format(pickupDate),
-                  Colors.blue.shade600,
+                  AppColors.indigo,
                 ),
 
                 const SizedBox(height: 12),
@@ -478,7 +539,7 @@ class _RequestCardState extends State<RequestCard>
                   Icons.location_on_rounded,
                   'Location',
                   '${widget.requestData['userTown']}',
-                  Colors.red.shade600,
+                  AppColors.blue,
                 ),
 
                 const SizedBox(height: 16),
@@ -497,15 +558,17 @@ class _RequestCardState extends State<RequestCard>
                         return Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.purple.shade50,
+                            color: AppColors.indigo.withOpacity(0.06),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.purple.shade200),
+                            border: Border.all(
+                              color: AppColors.indigo.withOpacity(0.2),
+                            ),
                           ),
                           child: _buildInfoRow(
                             Icons.person_rounded,
                             'Assigned Collector',
                             '${collectorData['name']} - ${collectorData['phone']}',
-                            Colors.purple.shade600,
+                            AppColors.indigo,
                           ),
                         );
                       }
@@ -517,15 +580,17 @@ class _RequestCardState extends State<RequestCard>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: AppColors.warning.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange.shade200),
+                      border: Border.all(
+                        color: AppColors.warning.withOpacity(0.28),
+                      ),
                     ),
                     child: _buildInfoRow(
                       Icons.schedule_rounded,
                       'Collector Status',
                       'Waiting for collector assignment',
-                      Colors.orange.shade600,
+                      AppColors.warning,
                     ),
                   ),
 
@@ -543,8 +608,10 @@ class _RequestCardState extends State<RequestCard>
                           icon: const Icon(Icons.close, size: 18),
                           label: const Text('Cancel'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red.shade600,
-                            side: BorderSide(color: Colors.red.shade300),
+                            foregroundColor: AppColors.danger,
+                            side: BorderSide(
+                              color: AppColors.danger.withOpacity(0.6),
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -564,8 +631,10 @@ class _RequestCardState extends State<RequestCard>
                         icon: const Icon(Icons.info_outline, size: 18),
                         label: const Text('Details'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.blue.shade600,
-                          side: BorderSide(color: Colors.blue.shade300),
+                          foregroundColor: AppColors.indigo,
+                          side: BorderSide(
+                            color: AppColors.indigo.withOpacity(0.6),
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -598,7 +667,7 @@ class _RequestCardState extends State<RequestCard>
                           icon: const Icon(Icons.chat_bubble_outline, size: 18),
                           label: const Text('Chat'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade600,
+                            backgroundColor: AppColors.blue,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -628,28 +697,28 @@ class _RequestCardState extends State<RequestCard>
 
     switch (status.toLowerCase()) {
       case 'pending':
-        backgroundColor = Colors.orange.shade100;
-        textColor = Colors.orange.shade800;
+        backgroundColor = AppColors.warning.withOpacity(0.16);
+        textColor = AppColors.warning;
         icon = Icons.schedule_rounded;
-        gradientColors = [Colors.orange.shade100, Colors.orange.shade50];
+        gradientColors = [AppColors.warning.withOpacity(0.18), Colors.white];
         break;
       case 'accepted':
-        backgroundColor = Colors.blue.shade100;
-        textColor = Colors.blue.shade800;
+        backgroundColor = AppColors.indigo.withOpacity(0.14);
+        textColor = AppColors.indigo;
         icon = Icons.check_circle_outline_rounded;
-        gradientColors = [Colors.blue.shade100, Colors.blue.shade50];
+        gradientColors = [AppColors.indigo.withOpacity(0.16), Colors.white];
         break;
       case 'completed':
-        backgroundColor = Colors.green.shade100;
-        textColor = Colors.green.shade800;
+        backgroundColor = AppColors.success.withOpacity(0.14);
+        textColor = AppColors.success;
         icon = Icons.check_circle_rounded;
-        gradientColors = [Colors.green.shade100, Colors.green.shade50];
+        gradientColors = [AppColors.success.withOpacity(0.16), Colors.white];
         break;
       case 'cancelled':
-        backgroundColor = Colors.red.shade100;
-        textColor = Colors.red.shade800;
+        backgroundColor = AppColors.danger.withOpacity(0.14);
+        textColor = AppColors.danger;
         icon = Icons.cancel_outlined;
-        gradientColors = [Colors.red.shade100, Colors.red.shade50];
+        gradientColors = [AppColors.danger.withOpacity(0.16), Colors.white];
         break;
       default:
         backgroundColor = Colors.grey.shade100;
@@ -663,7 +732,7 @@ class _RequestCardState extends State<RequestCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
+        border: Border.all(color: textColor.withOpacity(0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -696,7 +765,7 @@ class _RequestCardState extends State<RequestCard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
+            color: iconColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: iconColor),
@@ -711,7 +780,7 @@ class _RequestCardState extends State<RequestCard>
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -719,7 +788,7 @@ class _RequestCardState extends State<RequestCard>
                 value,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSecondary,
                   height: 1.3,
                 ),
               ),
@@ -742,7 +811,7 @@ class _RequestCardState extends State<RequestCard>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.white, Colors.green.shade50],
+              colors: [Colors.white, AppColors.indigo.withOpacity(0.05)],
             ),
           ),
           child: Column(
@@ -754,12 +823,12 @@ class _RequestCardState extends State<RequestCard>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
+                      color: AppColors.indigo.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       Icons.info_outline_rounded,
-                      color: Colors.green.shade600,
+                      color: AppColors.indigo,
                       size: 24,
                     ),
                   ),
@@ -768,7 +837,7 @@ class _RequestCardState extends State<RequestCard>
                     'Request Details',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Colors.green.shade800,
+                      color: AppColors.navy,
                     ),
                   ),
                 ],
@@ -821,7 +890,7 @@ class _RequestCardState extends State<RequestCard>
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade600,
+                    backgroundColor: AppColors.indigo,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -880,4 +949,3 @@ class _RequestCardState extends State<RequestCard>
     );
   }
 }
-

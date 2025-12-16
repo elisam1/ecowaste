@@ -96,7 +96,7 @@ class _AboutPageState extends State<AboutPage> with TickerProviderStateMixin {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF2E7D32), Color(0xFF388E3C), Color(0xFF4CAF50)],
+            colors: [Color(0xFF1F2A44), Color(0xFF30489C), Color(0xFF4C6FFF)],
           ),
         ),
         child: SafeArea(
@@ -510,4 +510,3 @@ class FeatureItem {
     required this.description,
   });
 }
-

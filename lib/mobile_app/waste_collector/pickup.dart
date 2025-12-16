@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 ///import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
 // ignore: unused_import
@@ -595,9 +596,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               ),
               const Spacer(),
               Text(
-                'GHâ‚µ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
+                'GHS ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
                 style: const TextStyle(
-                  color: Colors.green,
+                  color: AppColors.blue,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -674,7 +675,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 Icon(Icons.payment, color: Colors.grey[500], size: 16),
                 const SizedBox(width: 4),
                 Text(
-                  '${request['binCount']} bins Ã— GHâ‚µ${request['pricePerBin']} = GHâ‚µ${request['totalAmount']}',
+                  '${request['binCount']} bins × GHS${request['pricePerBin']} = GHS${request['totalAmount']}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
@@ -683,7 +684,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
 
           Text(
             'Requested ${_getTimeAgo(createdAt)}',
-            style: TextStyle(color: Colors.green[500], fontSize: 12),
+            style: TextStyle(color: AppColors.blue, fontSize: 12),
           ),
           const SizedBox(height: 16),
 
@@ -820,9 +821,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               ),
               const Spacer(),
               Text(
-                'GHâ‚µ ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
+                'GHS ${request['totalAmount']?.toString() ?? _calculateEarning(wasteCategories)}',
                 style: const TextStyle(
-                  color: Colors.green,
+                  color: AppColors.blue,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -898,7 +899,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 Icon(Icons.payment, color: Colors.grey[500], size: 16),
                 const SizedBox(width: 4),
                 Text(
-                  '${request['binCount']} bins Ã— GHâ‚µ${request['pricePerBin']} = GHâ‚µ${request['totalAmount']}',
+                  '${request['binCount']} bins × GHS${request['pricePerBin']} = GHS${request['totalAmount']}',
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
@@ -978,7 +979,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 icon: const Icon(Icons.check, size: 18),
                 label: const Text('Complete'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.blue,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 4,
                     vertical: 12,
@@ -1050,18 +1051,18 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: AppColors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    Icon(Icons.check_circle, color: AppColors.blue, size: 16),
                     SizedBox(width: 8),
                     Text(
                       ' COMPLETED',
                       style: TextStyle(
-                        color: Colors.green,
+                        color: AppColors.blue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1202,11 +1203,17 @@ class _PickupManagementPageState extends State<PickupManagementPage>
   }
 
   // Firebase Operations
-  Future<void> _updateRequestStatus(String requestId, String newStatus) async {
+  Future<void> _updateRequestStatus(String requestId, String newStatus, {int? price}) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
       final updateData = {
         'status': newStatus,
+        if (newStatus == 'accepted' && price != null) ...{
+          'totalAmount': price,
+          'pricePerBin': price,
+          'updatedAt': FieldValue.serverTimestamp(),
+          'collectorId': widget.collectorId,
+        },
         if (newStatus == 'completed') ...{
           'updatedAt': FieldValue.serverTimestamp(),
           'collectorId': widget.collectorId,
@@ -1333,24 +1340,132 @@ class _PickupManagementPageState extends State<PickupManagementPage>
 
   // Dialog Methods
   void _showAcceptDialog(String requestId) {
+    TextEditingController priceController = TextEditingController();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Accept Pickup Request'),
-        content: const Text(
-          'Are you sure you want to accept this pickup request?',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.blue.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.check_circle, color: AppColors.blue, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Text('Set Your Pickup Rate'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter the amount you want to charge for this pickup (GHS):',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: priceController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: 'Enter amount in GHS',
+                prefixText: 'GHS ',
+                prefixStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blue,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.blue),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.indigo, width: 2),
+                ),
+                filled: true,
+                fillColor: AppColors.mutedSurface,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info, color: AppColors.warning, size: 16),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You can modify this rate later if needed',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              _updateRequestStatus(requestId, 'accepted');
+              final price = double.tryParse(priceController.text);
+              if (price != null && price > 0) {
+                Navigator.pop(context);
+                _updateRequestStatus(requestId, 'accepted', price: price.toInt());
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text('Pickup accepted at GHS $price'),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: AppColors.blue,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a valid amount'),
+                    backgroundColor: AppColors.danger,
+                  ),
+                );
+              }
             },
-            child: const Text('Accept'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.blue,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Accept at This Rate'),
           ),
         ],
       ),

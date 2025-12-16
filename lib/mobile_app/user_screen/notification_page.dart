@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class UserNotificationPage extends StatefulWidget {
   const UserNotificationPage({super.key});
@@ -15,21 +16,21 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           'Notifications',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.indigo,
         elevation: 0,
-        foregroundColor: Colors.black87,
+        foregroundColor: Colors.white,
         actions: [
           TextButton(
             onPressed: _markAllAsRead,
             child: const Text(
               'Mark All Read',
-              style: TextStyle(color: Colors.blue),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -57,21 +58,21 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                   Icon(
                     Icons.notifications_none,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: AppColors.indigo.withValues(alpha: 0.25),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No notifications yet',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'You\'ll see notifications here when they arrive',
-                    style: TextStyle(color: Colors.grey[500]),
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -124,17 +125,19 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isRead ? Colors.white : Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
+        color: isRead ? Colors.white : AppColors.blue.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isRead ? Colors.grey.shade200 : Colors.blue.shade200,
-          width: isRead ? 1 : 2,
+          color: isRead
+              ? Colors.grey.shade200
+              : AppColors.blue.withValues(alpha: 0.4),
+          width: isRead ? 1 : 1.4,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -164,7 +167,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade600,
+                          color: AppColors.blue,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -200,7 +203,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
               notification['message'] ?? '',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: AppColors.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -217,14 +220,17 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
               children: [
                 Text(
                   timeAgo,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 if (!isRead)
                   TextButton(
                     onPressed: () => _markAsRead(notificationId),
                     child: const Text(
                       'Mark Read',
-                      style: TextStyle(color: Colors.blue, fontSize: 12),
+                      style: TextStyle(color: AppColors.indigo, fontSize: 12),
                     ),
                   ),
               ],
@@ -255,16 +261,16 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
       decoration: BoxDecoration(
         color: shouldDisableButtons
             ? (data['status'] == 'completed'
-                  ? Colors.green.shade50
-                  : Colors.red.shade50)
-            : Colors.orange.shade50,
+                  ? AppColors.success.withOpacity(0.12)
+                  : AppColors.danger.withOpacity(0.12))
+            : AppColors.warning.withOpacity(0.14),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: shouldDisableButtons
               ? (data['status'] == 'completed'
-                    ? Colors.green.shade200
-                    : Colors.red.shade200)
-              : Colors.orange.shade200,
+                    ? AppColors.success.withOpacity(0.3)
+                    : AppColors.danger.withOpacity(0.3))
+              : AppColors.warning.withOpacity(0.35),
         ),
       ),
       child: Column(
@@ -280,9 +286,9 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                     : Icons.payment,
                 color: shouldDisableButtons
                     ? (data['status'] == 'completed'
-                          ? Colors.green.shade600
-                          : Colors.red.shade600)
-                    : Colors.orange.shade600,
+                          ? AppColors.success
+                          : AppColors.danger)
+                    : AppColors.warning,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -297,9 +303,9 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                   fontWeight: FontWeight.w600,
                   color: shouldDisableButtons
                       ? (data['status'] == 'completed'
-                            ? Colors.green.shade700
-                            : Colors.red.shade700)
-                      : Colors.orange.shade700,
+                            ? AppColors.success
+                            : AppColors.danger)
+                      : AppColors.warning,
                 ),
               ),
             ],
@@ -311,9 +317,9 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
               fontSize: 13,
               color: shouldDisableButtons
                   ? (data['status'] == 'completed'
-                        ? Colors.green.shade700
-                        : Colors.red.shade700)
-                  : Colors.orange.shade700,
+                        ? AppColors.success
+                        : AppColors.danger)
+                  : AppColors.warning,
             ),
           ),
           Text(
@@ -322,9 +328,9 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
               fontSize: 13,
               color: shouldDisableButtons
                   ? (data['status'] == 'completed'
-                        ? Colors.green.shade700
-                        : Colors.red.shade700)
-                  : Colors.orange.shade700,
+                        ? AppColors.success
+                        : AppColors.danger)
+                  : AppColors.warning,
             ),
           ),
           const SizedBox(height: 12),
@@ -338,11 +344,11 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: shouldDisableButtons
                         ? Colors.grey.shade500
-                        : Colors.green.shade600,
+                        : AppColors.success,
                     side: BorderSide(
                       color: shouldDisableButtons
                           ? Colors.grey.shade400
-                          : Colors.green.shade600,
+                          : AppColors.success,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -357,7 +363,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                     style: TextStyle(
                       color: shouldDisableButtons
                           ? Colors.grey.shade500
-                          : Colors.green.shade600,
+                          : AppColors.success,
                     ),
                   ),
                 ),
@@ -371,11 +377,11 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: shouldDisableButtons
                         ? Colors.grey.shade500
-                        : Colors.red.shade600,
+                        : AppColors.danger,
                     side: BorderSide(
                       color: shouldDisableButtons
                           ? Colors.grey.shade400
-                          : Colors.red.shade600,
+                          : AppColors.danger,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -386,7 +392,7 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
                     style: TextStyle(
                       color: shouldDisableButtons
                           ? Colors.grey.shade500
-                          : Colors.red.shade600,
+                          : AppColors.danger,
                     ),
                   ),
                 ),

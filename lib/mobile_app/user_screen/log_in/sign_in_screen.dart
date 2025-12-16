@@ -59,7 +59,7 @@ class _SignInScreenState extends State<SignInScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF4CAF50), Color(0xFF2E7D32), Color(0xFF1B5E20)],
+            colors: [Color(0xFF4C6FFF), Color(0xFF30489C), Color(0xFF1F2A44)],
           ),
         ),
         child: SafeArea(
@@ -108,7 +108,7 @@ class _SignInScreenState extends State<SignInScreen>
                   ),
                 ],
               ),
-              child: const Icon(Icons.eco, size: 50, color: Color(0xFF4CAF50)),
+              child: const Icon(Icons.eco, size: 50, color: Color(0xFF4C6FFF)),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -167,7 +167,7 @@ class _SignInScreenState extends State<SignInScreen>
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
+                  color: const Color(0xFF30489C),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -198,7 +198,7 @@ class _SignInScreenState extends State<SignInScreen>
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         labelText: 'Email',
-        prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF4CAF50)),
+        prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF30489C)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -231,7 +231,7 @@ class _SignInScreenState extends State<SignInScreen>
       obscureText: _obscurePassword,
       decoration: InputDecoration(
         labelText: 'Password',
-        prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF4CAF50)),
+        prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF30489C)),
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -281,7 +281,7 @@ class _SignInScreenState extends State<SignInScreen>
         child: const Text(
           'Forgot Password?',
           style: TextStyle(
-            color: Color(0xFF4CAF50),
+            color: const Color(0xFF30489C),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -295,7 +295,7 @@ class _SignInScreenState extends State<SignInScreen>
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleSignIn,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4CAF50),
+          backgroundColor: const Color(0xFF30489C),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

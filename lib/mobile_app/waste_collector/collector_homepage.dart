@@ -85,7 +85,7 @@ class _CollectorMainScreenState extends State<CollectorMainScreen> {
           },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF4CAF50),
+          selectedItemColor: const Color(0xFF30489C),
           unselectedItemColor: Colors.grey[400],
           selectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w600,
