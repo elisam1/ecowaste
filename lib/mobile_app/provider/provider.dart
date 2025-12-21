@@ -71,16 +71,25 @@ class SortScoreProvider with ChangeNotifier {
   int _totalPickups = 0;
   int _monthlyPickups = 0;
   int _rank = 0;
-  int _sortScore = 0;
+  int _sortScore = 0; // Now represents real recycling points
+  double _totalWeightKg = 0.0;
+  int _globalRank = 0;
+  int _totalUsers = 0;
   bool _isLoading = false;
   StreamSubscription<QuerySnapshot>? _pickupStream;
-  Timer? _sortScoreTimer; // Added timer for auto-generation
 
   int get totalPickups => _totalPickups;
   int get monthlyPickups => _monthlyPickups;
   int get rank => _rank;
   int get sortScore => _sortScore;
+  int get globalRank => _globalRank;
+  int get totalUsers => _totalUsers;
+  double get totalWeightKg => _totalWeightKg;
   bool get isLoading => _isLoading;
+
+  // Points calculation: 10 points per pickup + weight-based bonus
+  static const int pointsPerPickup = 10;
+  static const int pointsPerKg = 5;
 
   SortScoreProvider() {
     _initializeData();
@@ -90,75 +99,49 @@ class SortScoreProvider with ChangeNotifier {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
       await calculatePickupStats(userId);
-      await _generateInitialSortScore(userId); // Generate initial score
+      await _calculateRecyclingPoints(userId);
       _startListeningToPickups(userId);
-      _startAutoGeneration(userId); // Start auto-generation timer
     }
   }
 
-  void _startAutoGeneration(String userId) {
-    // Cancel existing timer if any
-    _sortScoreTimer?.cancel();
-
-    // Generate new sort score every 5 minutes (300 seconds)
-    _sortScoreTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
-      _generateRandomSortScore(userId);
-    });
-  }
-
-  Future<void> _generateInitialSortScore(String userId) async {
+  Future<void> _calculateRecyclingPoints(String userId) async {
     try {
-      // Check if user already has a sort score
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
+      // Get user's completed pickups to calculate real points
+      final pickups = await FirebaseFirestore.instance
+          .collection('pickup_requests')
+          .where('userId', isEqualTo: userId)
+          .where('status', isEqualTo: 'completed')
           .get();
 
-      if (userDoc.exists && userDoc.data()?['sortScore'] != null) {
-        // User already has a sort score, load it
-        _sortScore = userDoc.data()!['sortScore'];
-      } else {
-        // Generate new sort score
-        await _generateRandomSortScore(userId);
+      double totalWeight = 0.0;
+      int completedCount = pickups.docs.length;
+
+      // Calculate total weight from pickup data
+      for (var doc in pickups.docs) {
+        final data = doc.data();
+        // Estimate 5kg per pickup if no weight specified
+        final weight = (data['estimatedWeight'] as num?)?.toDouble() ?? 5.0;
+        totalWeight += weight;
       }
+
+      _totalWeightKg = totalWeight;
+
+      // Calculate points: 10 points per pickup + 5 points per kg
+      _sortScore =
+          (completedCount * pointsPerPickup) +
+          (totalWeight * pointsPerKg).round();
+
+      // Update user document with calculated points
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'sortScore': _sortScore,
+        'totalWeightKg': _totalWeightKg,
+        'totalPickups': completedCount,
+        'lastPointsUpdate': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
       notifyListeners();
     } catch (e) {
-      debugPrint("Error generating initial sort score: $e");
-      // Fallback to generating new score
-      await _generateRandomSortScore(userId);
-    }
-  }
-
-  Future<void> _generateRandomSortScore(String userId) async {
-    try {
-      final random = Random();
-      _sortScore = 100 + random.nextInt(9900); // Random between 100 and 9999
-
-      // Check if user document exists before updating
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-
-      if (userDoc.exists) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .update({
-              'sortScore': _sortScore,
-              'lastSortScoreUpdate': FieldValue.serverTimestamp(),
-            });
-      } else {
-        // Create the document if it doesn't exist
-        await FirebaseFirestore.instance.collection('users').doc(userId).set({
-          'sortScore': _sortScore,
-          'lastSortScoreUpdate': FieldValue.serverTimestamp(),
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Error generating random sort score: $e");
+      debugPrint("Error calculating recycling points: $e");
       notifyListeners();
     }
   }
@@ -208,6 +191,7 @@ class SortScoreProvider with ChangeNotifier {
           .get();
 
       _calculatePickupsFromSnapshot(snapshot);
+      await _calculateRecyclingPoints(userId);
       await fetchUserRank(userId);
 
       _isLoading = false;
@@ -221,65 +205,58 @@ class SortScoreProvider with ChangeNotifier {
 
   Future<void> fetchUserRank(String userId) async {
     try {
-      // First check if user has a cached rank in user_stats collection
-      final userStatsDoc = await FirebaseFirestore.instance
-          .collection('user_stats')
+      // Get current user's points
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
           .doc(userId)
           .get();
 
-      if (userStatsDoc.exists && userStatsDoc.data()?['rank'] != null) {
-        _rank = userStatsDoc.data()!['rank'];
+      if (!userDoc.exists) {
+        _rank = 0;
+        _globalRank = 0;
         notifyListeners();
         return;
       }
 
-      // Fallback: Only get user's completed requests count and approximate rank
-      final userCompletedCount = await FirebaseFirestore.instance
-          .collection('pickup_requests')
-          .where('userId', isEqualTo: userId)
-          .where('status', isEqualTo: 'completed')
-          .count()
+      final userPoints = userDoc.data()?['sortScore'] ?? 0;
+
+      // Get all users with points (for global leaderboard)
+      final allUsersQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .where('sortScore', isGreaterThan: 0)
           .get();
 
-      final totalUserCompletedCount = userCompletedCount.count ?? 0;
+      _totalUsers = allUsersQuery.docs.length;
 
-      // Get count of users with more completions than current user
-      final betterUsersQuery = await FirebaseFirestore.instance
-          .collection('pickup_requests')
-          .where('status', isEqualTo: 'completed')
-          .get();
-
-      final Map<String, int> userCounts = {};
-      for (var doc in betterUsersQuery.docs) {
-        final uid = doc['userId'];
-        userCounts[uid] = (userCounts[uid] ?? 0) + 1;
-      }
-
-      // Count users with more completions
-      int betterUsersCount = 0;
-      for (var count in userCounts.values) {
-        if (count > totalUserCompletedCount) {
-          betterUsersCount++;
+      // Count users with higher points (global rank)
+      int usersWithMorePoints = 0;
+      for (var doc in allUsersQuery.docs) {
+        final points = doc.data()['sortScore'] ?? 0;
+        if (points > userPoints) {
+          usersWithMorePoints++;
         }
       }
 
-      _rank = betterUsersCount + 1;
+      _globalRank = usersWithMorePoints + 1;
+      _rank = _globalRank; // Keep _rank for backward compatibility
 
-      // Cache the result for future use
+      // Cache the result
       await FirebaseFirestore.instance
           .collection('user_stats')
           .doc(userId)
           .set({
+            'globalRank': _globalRank,
             'rank': _rank,
             'totalPickups': _totalPickups,
+            'sortScore': userPoints,
             'lastUpdated': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
 
       notifyListeners();
     } catch (e) {
-      debugPrint("Error fetching rank: $e");
-      // Set a default rank if there's an error
+      debugPrint("Error fetching global rank: $e");
       _rank = 0;
+      _globalRank = 0;
       notifyListeners();
     }
   }
@@ -287,7 +264,6 @@ class SortScoreProvider with ChangeNotifier {
   @override
   void dispose() {
     _pickupStream?.cancel();
-    _sortScoreTimer?.cancel(); // Cancel timer on dispose
     super.dispose();
   }
 }

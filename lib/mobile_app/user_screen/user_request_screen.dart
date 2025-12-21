@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
+import 'package:flutter_application_1/mobile_app/widget/collector_rating_display.dart';
 import 'package:intl/intl.dart';
 
 class UserRequestsScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -159,7 +160,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.indigo.withOpacity(0.08),
+                        color: AppColors.indigo.withValues(alpha: 0.08),
                         blurRadius: 26,
                         offset: const Offset(0, 10),
                       ),
@@ -171,7 +172,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: AppColors.indigo.withOpacity(0.08),
+                          color: AppColors.indigo.withValues(alpha: 0.08),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -223,7 +224,7 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.blue.withOpacity(0.14),
+                        color: AppColors.blue.withValues(alpha: 0.14),
                         blurRadius: 24,
                         offset: const Offset(0, 12),
                       ),
@@ -468,15 +469,15 @@ class _RequestCardState extends State<RequestCard>
             boxShadow: [
               BoxShadow(
                 color: _isPressed
-                    ? AppColors.indigo.withOpacity(0.18)
-                    : Colors.black.withOpacity(0.04),
+                    ? AppColors.indigo.withValues(alpha: 0.18)
+                    : Colors.black.withValues(alpha: 0.04),
                 blurRadius: _isPressed ? 18 : 14,
                 offset: const Offset(0, 10),
               ),
             ],
             border: Border.all(
               color: _isPressed
-                  ? AppColors.blue.withOpacity(0.45)
+                  ? AppColors.blue.withValues(alpha: 0.45)
                   : Colors.transparent,
               width: 1.2,
             ),
@@ -558,17 +559,27 @@ class _RequestCardState extends State<RequestCard>
                         return Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.indigo.withOpacity(0.06),
+                            color: AppColors.indigo.withValues(alpha: 0.06),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: AppColors.indigo.withOpacity(0.2),
+                              color: AppColors.indigo.withValues(alpha: 0.2),
                             ),
                           ),
-                          child: _buildInfoRow(
-                            Icons.person_rounded,
-                            'Assigned Collector',
-                            '${collectorData['name']} - ${collectorData['phone']}',
-                            AppColors.indigo,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoRow(
+                                Icons.person_rounded,
+                                'Assigned Collector',
+                                '${collectorData['name']} - ${collectorData['phone']}',
+                                AppColors.indigo,
+                              ),
+                              const SizedBox(height: 8),
+                              CollectorRatingDisplay(
+                                collectorId: collectorId!,
+                                compact: true,
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -580,10 +591,10 @@ class _RequestCardState extends State<RequestCard>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.warning.withOpacity(0.12),
+                      color: AppColors.warning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.warning.withOpacity(0.28),
+                        color: AppColors.warning.withValues(alpha: 0.28),
                       ),
                     ),
                     child: _buildInfoRow(
@@ -610,7 +621,7 @@ class _RequestCardState extends State<RequestCard>
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.danger,
                             side: BorderSide(
-                              color: AppColors.danger.withOpacity(0.6),
+                              color: AppColors.danger.withValues(alpha: 0.6),
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -633,7 +644,7 @@ class _RequestCardState extends State<RequestCard>
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.indigo,
                           side: BorderSide(
-                            color: AppColors.indigo.withOpacity(0.6),
+                            color: AppColors.indigo.withValues(alpha: 0.6),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -697,28 +708,40 @@ class _RequestCardState extends State<RequestCard>
 
     switch (status.toLowerCase()) {
       case 'pending':
-        backgroundColor = AppColors.warning.withOpacity(0.16);
+        backgroundColor = AppColors.warning.withValues(alpha: 0.16);
         textColor = AppColors.warning;
         icon = Icons.schedule_rounded;
-        gradientColors = [AppColors.warning.withOpacity(0.18), Colors.white];
+        gradientColors = [
+          AppColors.warning.withValues(alpha: 0.18),
+          Colors.white,
+        ];
         break;
       case 'accepted':
-        backgroundColor = AppColors.indigo.withOpacity(0.14);
+        backgroundColor = AppColors.indigo.withValues(alpha: 0.14);
         textColor = AppColors.indigo;
         icon = Icons.check_circle_outline_rounded;
-        gradientColors = [AppColors.indigo.withOpacity(0.16), Colors.white];
+        gradientColors = [
+          AppColors.indigo.withValues(alpha: 0.16),
+          Colors.white,
+        ];
         break;
       case 'completed':
-        backgroundColor = AppColors.success.withOpacity(0.14);
+        backgroundColor = AppColors.success.withValues(alpha: 0.14);
         textColor = AppColors.success;
         icon = Icons.check_circle_rounded;
-        gradientColors = [AppColors.success.withOpacity(0.16), Colors.white];
+        gradientColors = [
+          AppColors.success.withValues(alpha: 0.16),
+          Colors.white,
+        ];
         break;
       case 'cancelled':
-        backgroundColor = AppColors.danger.withOpacity(0.14);
+        backgroundColor = AppColors.danger.withValues(alpha: 0.14);
         textColor = AppColors.danger;
         icon = Icons.cancel_outlined;
-        gradientColors = [AppColors.danger.withOpacity(0.16), Colors.white];
+        gradientColors = [
+          AppColors.danger.withValues(alpha: 0.16),
+          Colors.white,
+        ];
         break;
       default:
         backgroundColor = Colors.grey.shade100;
@@ -732,7 +755,7 @@ class _RequestCardState extends State<RequestCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: textColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -765,7 +788,7 @@ class _RequestCardState extends State<RequestCard>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: iconColor),
@@ -811,7 +834,7 @@ class _RequestCardState extends State<RequestCard>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.white, AppColors.indigo.withOpacity(0.05)],
+              colors: [Colors.white, AppColors.indigo.withValues(alpha: 0.05)],
             ),
           ),
           child: Column(

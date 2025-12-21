@@ -40,6 +40,7 @@ import 'package:flutter_application_1/mobile_app/user_screen/notification_page.d
 import 'package:flutter_application_1/mobile_app/user_screen/user_tracking_collector.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/user_request_screen.dart';
 import 'package:flutter_application_1/mobile_app/service/welcome_screen.dart';
+import 'package:flutter_application_1/mobile_app/service/splash_screen.dart';
 import 'package:flutter_application_1/mobile_app/service/role_selection.dart';
 import 'package:flutter_application_1/mobile_app/waste_collector/scheduling_week.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/bottombar.dart';
@@ -72,7 +73,7 @@ void main() async {
   try {
     await OfflinePersistenceService().initialize();
   } catch (e) {
-    print('❌ Failed to initialize offline persistence: $e');
+    debugPrint('❌ Failed to initialize offline persistence: $e');
   }
 
   // Initialize Firebase App Check with error handling
@@ -82,7 +83,7 @@ void main() async {
     );
   } catch (e) {
     // App Check failed to initialize, continue without it
-    print('Firebase App Check initialization failed: $e');
+    debugPrint('Firebase App Check initialization failed: $e');
   }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -118,14 +119,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Widget _initialScreen;
+  final Widget _initialScreen = const SplashScreen();
 
   @override
   void initState() {
     super.initState();
     _setupFCM();
-    final user = FirebaseAuth.instance.currentUser;
-    _initialScreen = user != null ? const HomeScreen() : const WelcomeScreen();
   }
 
   void _setupFCM() async {

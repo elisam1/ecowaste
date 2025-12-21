@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
+import 'package:flutter_application_1/mobile_app/widget/collector_rating_dialog.dart';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -38,6 +39,9 @@ class _UserCollectorTrackingScreenState
   String _requestStatus = 'in_progress';
   double? _estimatedDistance;
   String? _estimatedTime;
+  int? _estimatedMinutes; // ETA in minutes for notification logic
+  bool _fiveMinuteNotificationSent =
+      false; // Track if we've sent the notification
   Timer? _locationUpdateTimer;
   StreamSubscription<DocumentSnapshot>? _requestStatusListener;
   StreamSubscription<DocumentSnapshot>? _collectorLocationListener;
@@ -339,14 +343,21 @@ class _UserCollectorTrackingScreenState
           final List<LatLng> routeCoords = _decodePolyline(polylinePoints);
 
           final duration = route['legs'][0]['duration']['text'];
-          final distance = route['legs'][0]['distance']['text'];
+          final durationValue =
+              route['legs'][0]['duration']['value']; // seconds
           final distanceValue =
               route['legs'][0]['distance']['value']; // in meters
+
+          final etaMinutes = (durationValue / 60).round();
 
           setState(() {
             _estimatedDistance = distanceValue.toDouble();
             _estimatedTime = duration;
+            _estimatedMinutes = etaMinutes;
           });
+
+          // Check for 5-minute notification
+          _checkFiveMinuteNotification(etaMinutes);
 
           _createRoutePolyline(routeCoords);
         } else {
@@ -490,7 +501,7 @@ class _UserCollectorTrackingScreenState
         });
   }
 
-  void _showStatusChangeDialog(String newStatus) {
+  void _showStatusChangeDialog(String newStatus) async {
     String title;
     String message;
     Color color;
@@ -512,7 +523,7 @@ class _UserCollectorTrackingScreenState
         color = Colors.blue;
     }
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -534,15 +545,100 @@ class _UserCollectorTrackingScreenState
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              if (newStatus == 'completed' || newStatus == 'cancelled') {
-                Navigator.pop(context); // Go back to previous screen
-              }
             },
             child: const Text('OK'),
           ),
         ],
       ),
     );
+
+    // Show rating dialog if pickup was completed
+    if (newStatus == 'completed' && mounted) {
+      // Get collector ID from the pickup request
+      try {
+        final requestDoc = await FirebaseFirestore.instance
+            .collection('pickup_requests')
+            .doc(widget.requestId)
+            .get();
+
+        if (requestDoc.exists && mounted) {
+          final collectorId = requestDoc.data()?['collectorId'] as String?;
+          final collectorName = _collectorName ?? 'Collector';
+
+          if (collectorId != null && collectorId.isNotEmpty) {
+            await CollectorRatingDialog.show(
+              context: context,
+              collectorId: collectorId,
+              collectorName: collectorName,
+              userId: widget.userId,
+              requestId: widget.requestId,
+            );
+          }
+        }
+      } catch (e) {
+        log.e('Error showing rating dialog: $e');
+      }
+
+      if (mounted) {
+        Navigator.pop(context); // Go back to previous screen
+      }
+    } else if (newStatus == 'cancelled' && mounted) {
+      Navigator.pop(context); // Go back to previous screen
+    }
+  }
+
+  void _checkFiveMinuteNotification(int etaMinutes) {
+    // Only send notification once when ETA drops to 5 minutes or less
+    if (etaMinutes <= 5 && !_fiveMinuteNotificationSent) {
+      _fiveMinuteNotificationSent = true;
+      _showFiveMinuteAlert();
+    }
+  }
+
+  void _showFiveMinuteAlert() {
+    if (!mounted) return;
+
+    // Show an in-app notification
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.notifications_active, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Collector Almost Here!',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${_collectorName ?? "Your collector"} is about 5 minutes away',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.indigo,
+        duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  String _formatDistance(double? meters) {
+    if (meters == null) return 'Calculating...';
+    if (meters < 1000) {
+      return '${meters.round()} m';
+    } else {
+      return '${(meters / 1000).toStringAsFixed(1)} km';
+    }
   }
 
   void _stopTracking() {
@@ -705,18 +801,18 @@ class _UserCollectorTrackingScreenState
                         end: Alignment.bottomRight,
                         colors: [
                           Colors.white,
-                          AppColors.blue.withOpacity(0.08),
+                          AppColors.blue.withValues(alpha: 0.08),
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 18,
                           offset: const Offset(0, 10),
                         ),
                       ],
                       border: Border.all(
-                        color: _getStatusColorValue().withOpacity(0.3),
+                        color: _getStatusColorValue().withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -731,7 +827,9 @@ class _UserCollectorTrackingScreenState
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _getStatusColorValue().withOpacity(0.12),
+                                color: _getStatusColorValue().withValues(
+                                  alpha: 0.12,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -796,7 +894,7 @@ class _UserCollectorTrackingScreenState
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Distance: $_estimatedDistance',
+                                'Distance: ${_formatDistance(_estimatedDistance)}',
                                 style: const TextStyle(
                                   color: AppColors.textSecondary,
                                   fontWeight: FontWeight.w600,
@@ -812,14 +910,15 @@ class _UserCollectorTrackingScreenState
                               const Icon(
                                 Icons.timer,
                                 size: 16,
-                                color: AppColors.textSecondary,
+                                color: AppColors.indigo,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 'ETA: $_estimatedTime',
                                 style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.indigo,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
                                 ),
                               ),
                             ],

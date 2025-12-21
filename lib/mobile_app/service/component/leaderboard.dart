@@ -57,7 +57,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           children: [
             Icon(Icons.emoji_events, color: Colors.amber, size: 28),
             SizedBox(width: 8),
-            Text('Leaderboard', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Global Leaderboard',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         centerTitle: true,
@@ -68,8 +71,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
+            .where('sortScore', isGreaterThan: 0)
             .orderBy('sortScore', descending: true)
-            .limit(20)
+            .limit(100)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -86,6 +90,47 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             opacity: _fadeAnimation,
             child: Column(
               children: [
+                // Points explanation banner
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade600, Colors.blue.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Earn 10 pts per pickup + 5 pts per kg recycled',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 // Podium (always build it even with 1 or 2 users)
                 _buildPodium(users),
 
@@ -439,7 +484,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'No Rankings Yet',
+            'No Recyclers Yet',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -448,7 +493,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Be the first to start sorting waste\nand climb the leaderboard!',
+            'Be the first to recycle waste\nand top the global leaderboard!',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -459,7 +504,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.recycling),
-            label: const Text('Start Sorting'),
+            label: const Text('Start Recycling'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -533,4 +578,3 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 //     );
 //   }
 // }
-

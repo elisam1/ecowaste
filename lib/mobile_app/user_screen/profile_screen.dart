@@ -1,5 +1,6 @@
 ﻿// ignore_for_file: unused_local_variable
 
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
@@ -81,26 +82,63 @@ class _ProfileScreenState extends State<ProfileScreen>
     final username = context.watch<UserProvider>().username;
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.navy, AppColors.indigo, AppColors.blue],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(110),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(32),
+            bottomRight: Radius.circular(32),
           ),
-        ),
-        centerTitle: true,
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+          child: Stack(
+            children: [
+              // Glassmorphism background
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF0D3B2E),
+                      Color(0xFF1A5D4A),
+                      Color(0xFF2E7D5F),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0D3B2E).withOpacity(0.18),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(color: Colors.white.withOpacity(0.05)),
+                ),
+              ),
+              // Animated title
+              SafeArea(
+                child: Center(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: const Text(
+                        'My Profile',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Optionally, add a leading back or menu button here if needed
+            ],
           ),
         ),
       ),
@@ -405,7 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildStatCard(
-                      title: 'Sort Score',
+                      title: 'Eco Points',
                       value: sortScore.toString(),
                       icon: Icons.eco_rounded,
                       color: AppColors.blue,
@@ -448,10 +486,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                     horizontal: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.indigo.withOpacity(0.08),
+                    color: AppColors.indigo.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.indigo.withOpacity(0.35),
+                      color: AppColors.indigo.withValues(alpha: 0.35),
                     ),
                   ),
                   child: const Row(
@@ -491,19 +529,19 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
         ],
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -568,7 +606,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: AppColors.indigo.withOpacity(0.3),
+                color: AppColors.indigo.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -671,12 +709,12 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.08)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.08)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -687,7 +725,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -707,7 +745,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         trailing: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Icon(Icons.arrow_forward_ios, size: 14, color: color),
@@ -722,12 +760,12 @@ class _ProfileScreenState extends State<ProfileScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.danger.withOpacity(0.06),
-            AppColors.danger.withOpacity(0.02),
+            AppColors.danger.withValues(alpha: 0.06),
+            AppColors.danger.withValues(alpha: 0.02),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.danger.withOpacity(0.25)),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.25)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -738,7 +776,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: AppColors.danger.withOpacity(0.12),
+            color: AppColors.danger.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.logout_rounded, color: Colors.red, size: 24),
@@ -758,7 +796,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         trailing: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.danger.withOpacity(0.12),
+            color: AppColors.danger.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -782,7 +820,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.danger.withOpacity(0.12),
+                color: AppColors.danger.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.logout, color: Colors.red, size: 20),

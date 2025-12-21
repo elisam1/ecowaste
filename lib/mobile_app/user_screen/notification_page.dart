@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
+import 'package:flutter_application_1/mobile_app/widget/collector_rating_dialog.dart';
 
 class UserNotificationPage extends StatefulWidget {
   const UserNotificationPage({super.key});
@@ -261,16 +262,16 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
       decoration: BoxDecoration(
         color: shouldDisableButtons
             ? (data['status'] == 'completed'
-                  ? AppColors.success.withOpacity(0.12)
-                  : AppColors.danger.withOpacity(0.12))
-            : AppColors.warning.withOpacity(0.14),
+                  ? AppColors.success.withValues(alpha: 0.12)
+                  : AppColors.danger.withValues(alpha: 0.12))
+            : AppColors.warning.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: shouldDisableButtons
               ? (data['status'] == 'completed'
-                    ? AppColors.success.withOpacity(0.3)
-                    : AppColors.danger.withOpacity(0.3))
-              : AppColors.warning.withOpacity(0.35),
+                    ? AppColors.success.withValues(alpha: 0.3)
+                    : AppColors.danger.withValues(alpha: 0.3))
+              : AppColors.warning.withValues(alpha: 0.35),
         ),
       ),
       child: Column(
@@ -456,11 +457,29 @@ class _UserNotificationPageState extends State<UserNotificationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Pickup confirmed! Payment of GHâ‚µ ${data['totalAmount'].toStringAsFixed(2)} has been released to ${data['collectorName']}',
+                'Pickup confirmed! Payment of GHS ${data['totalAmount'].toStringAsFixed(2)} has been released to ${data['collectorName']}',
               ),
               backgroundColor: Colors.green.shade600,
             ),
           );
+
+          // Show rating dialog after successful confirmation
+          final collectorId = data['collectorId'] as String?;
+          final collectorName = data['collectorName'] as String? ?? 'Collector';
+
+          if (collectorId != null && collectorId.isNotEmpty) {
+            // Small delay for better UX
+            await Future.delayed(const Duration(milliseconds: 500));
+            if (mounted) {
+              await CollectorRatingDialog.show(
+                context: context,
+                collectorId: collectorId,
+                collectorName: collectorName,
+                userId: userId,
+                requestId: pickupRequestId,
+              );
+            }
+          }
         }
       } catch (e) {
         if (mounted) {

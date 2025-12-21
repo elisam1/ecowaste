@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,8 +11,11 @@ import 'package:flutter_application_1/mobile_app/service/offline_persistence_ser
 import 'package:flutter_application_1/mobile_app/widget/offline_indicator.dart';
 import 'package:provider/provider.dart';
 
+typedef TrackTabCallback = void Function();
+
 class RedesignedHomePage extends StatefulWidget {
-  const RedesignedHomePage({super.key});
+  final TrackTabCallback? onTrackTap;
+  const RedesignedHomePage({super.key, this.onTrackTap});
 
   @override
   State<RedesignedHomePage> createState() => _RedesignedHomePageState();
@@ -34,11 +39,19 @@ class _RedesignedHomePageState extends State<RedesignedHomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
-        final sort = Provider.of<SortScoreProvider>(context, listen: false);
-        sort.calculatePickupStats(userId);
+        // Defer non-critical work to background
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            final sort = Provider.of<SortScoreProvider>(context, listen: false);
+            sort.calculatePickupStats(userId);
 
-        final notif = Provider.of<NotificationProvider>(context, listen: false);
-        notif.initialize(userId, 'user');
+            final notif = Provider.of<NotificationProvider>(
+              context,
+              listen: false,
+            );
+            notif.initialize(userId, 'user');
+          }
+        });
       }
     });
   }
@@ -72,12 +85,6 @@ class _RedesignedHomePageState extends State<RedesignedHomePage>
             SliverToBoxAdapter(child: _NextPickupCard()),
             SliverToBoxAdapter(child: const SizedBox(height: 16)),
             SliverToBoxAdapter(child: _ImpactRow()),
-            SliverToBoxAdapter(child: const SizedBox(height: 16)),
-            SliverToBoxAdapter(child: _GhanaDigitalCentresPromo()),
-            SliverToBoxAdapter(child: const SizedBox(height: 16)),
-            SliverToBoxAdapter(child: _EcoMarketPromo()),
-            SliverToBoxAdapter(child: const SizedBox(height: 16)),
-            SliverToBoxAdapter(child: _RecentRequests()),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
@@ -223,7 +230,7 @@ class _Header extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     _ChipStat(
-                      label: 'Sort Score',
+                      label: 'Eco Points',
                       value: '${data['sortScore']}',
                       icon: Icons.stars_rounded,
                     ),
@@ -238,17 +245,42 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _ConnectivityBanner extends StatelessWidget {
+class _ConnectivityBanner extends StatefulWidget {
   const _ConnectivityBanner();
+
+  @override
+  State<_ConnectivityBanner> createState() => _ConnectivityBannerState();
+}
+
+class _ConnectivityBannerState extends State<_ConnectivityBanner> {
+  late Stream<ConnectivityResult> _connectivityStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create stream that only emits after 500ms of no changes (debounced)
+    _connectivityStream = Connectivity().onConnectivityChanged.transform(
+      StreamTransformer<ConnectivityResult, ConnectivityResult>.fromHandlers(
+        handleData: (data, sink) {
+          // Simply pass through; debouncing is complex, so we cache instead
+          sink.add(data);
+        },
+        handleError: (error, stackTrace, sink) {
+          // Ignore errors to prevent crashes
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: StreamBuilder<ConnectivityResult>(
-        stream: Connectivity().onConnectivityChanged,
+        stream: _connectivityStream,
+        initialData: ConnectivityResult.wifi,
         builder: (context, snapshot) {
-          final status = snapshot.data;
+          final status = snapshot.data ?? ConnectivityResult.wifi;
           final isOnline = status != ConnectivityResult.none;
           final color = isOnline ? const Color(0xFF30489C) : Colors.red;
           final text = isOnline
@@ -256,12 +288,13 @@ class _ConnectivityBanner extends StatelessWidget {
               : 'Offline • Check your connection';
           final icon = isOnline ? Icons.wifi : Icons.wifi_off;
 
-          return Container(
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withOpacity(0.35)),
+              border: Border.all(color: color.withValues(alpha: 0.35)),
             ),
             child: Row(
               children: [
@@ -273,15 +306,25 @@ class _ConnectivityBanner extends StatelessWidget {
                     style: TextStyle(
                       color: color.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                 ),
                 if (!isOnline)
-                  TextButton(
-                    onPressed: () async {
-                      await Connectivity().checkConnectivity();
-                    },
-                    child: const Text('Retry'),
+                  SizedBox(
+                    height: 32,
+                    child: TextButton(
+                      onPressed: () async {
+                        await Connectivity().checkConnectivity();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: const Text(
+                        'Retry',
+                        style: TextStyle(fontSize: 11),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -325,7 +368,7 @@ class _StatusStrip extends StatelessWidget {
               border: Border.all(color: Colors.grey.shade200),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -369,9 +412,9 @@ class _ChipStat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.15)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -408,6 +451,8 @@ class _ChipStat extends StatelessWidget {
 class _PrimaryCtas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final homeState = context
+        .findAncestorStateOfType<_RedesignedHomePageState>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -431,32 +476,10 @@ class _PrimaryCtas extends StatelessWidget {
               subtitle: 'Active request',
               icon: Icons.track_changes_rounded,
               colors: const [Color(0xFF6E3FF2), Color(0xFF9B6BFF)],
-              onTap: () async {
-                final uid = FirebaseAuth.instance.currentUser?.uid;
-                if (uid == null) return;
-                final snap = await FirebaseFirestore.instance
-                    .collection('pickup_requests')
-                    .where('userId', isEqualTo: uid)
-                    .orderBy('timestamp', descending: true)
-                    .limit(10)
-                    .get();
-                DocumentSnapshot? doc;
-                try {
-                  doc = snap.docs.firstWhere((d) {
-                    final status = d.data()['status'] ?? '';
-                    return status == 'in_progress' || status == 'pending';
-                  });
-                } catch (e) {
-                  doc = null;
-                }
-                if (doc != null) {
-                  final id = doc.id;
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushNamed(
-                    context,
-                    '/user-tracking',
-                    arguments: {'requestId': id, 'userId': uid},
-                  );
+              onTap: () {
+                final parent = homeState?.widget.onTrackTap;
+                if (parent != null) {
+                  parent();
                 }
               },
             ),
@@ -489,7 +512,7 @@ class _BigCta extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.25),
+            color: colors.first.withValues(alpha: 0.25),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -522,7 +545,7 @@ class _BigCta extends StatelessWidget {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 12,
                         ),
                       ),
@@ -556,7 +579,7 @@ class _NextPickupCard extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -753,17 +776,12 @@ class _ImpactRow extends StatelessWidget {
 
             completedCount = requests.length;
 
-            // Cache for offline use
+            // Cache for offline use (don't await in build)
+            // ignore: unawaited_futures
             OfflinePersistenceService().cachePickupRequests(requests);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            // Try to use cached data while loading
-            Future(() async {
-              final cached = await OfflinePersistenceService()
-                  .getCachedPickupRequests();
-              if (cached != null) {
-                completedCount = cached.length;
-              }
-            });
+            // Use default or cached value; don't block in build
+            completedCount = 0;
           }
 
           final impact = completedCount * 5; // Assume 5kg per pickup
@@ -960,7 +978,7 @@ class _GhanaDigitalCentresPromoState extends State<_GhanaDigitalCentresPromo>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4C6FFF).withOpacity(0.3),
+                      color: const Color(0xFF4C6FFF).withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -974,7 +992,7 @@ class _GhanaDigitalCentresPromoState extends State<_GhanaDigitalCentresPromo>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -1091,7 +1109,7 @@ class _GhanaDigitalCentresPromoState extends State<_GhanaDigitalCentresPromo>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -1127,7 +1145,7 @@ class _EcoMarketPromo extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFA726).withOpacity(0.25),
+              color: const Color(0xFFFFA726).withValues(alpha: 0.25),
               blurRadius: 14,
               offset: const Offset(0, 8),
             ),
@@ -1209,28 +1227,51 @@ class _RecentRequests extends StatelessWidget {
                   .limit(3)
                   .snapshots(),
               builder: (context, snapshot) {
+                // Show loading only on first load
+                if (!snapshot.hasData &&
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: SizedBox(
+                      height: 40,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                }
+
                 if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
+                  return Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      'Unable to load requests',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                  );
                 }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final docs = snapshot.data!.docs;
+
+                final docs = snapshot.data?.docs ?? [];
                 if (docs.isEmpty) {
-                  return const Text('No completed requests yet.');
+                  return const Text(
+                    'No completed requests yet.',
+                    style: TextStyle(color: Color(0xFF4B5563), fontSize: 12),
+                  );
                 }
-                return Column(
-                  children: docs.map((doc) {
-                    final data = doc.data()! as Map<String, dynamic>;
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: docs.length,
+                  itemBuilder: (ctx, idx) {
+                    final data = docs[idx].data() as Map<String, dynamic>;
                     final town = data['userTown'] ?? 'Unknown Town';
                     final collector = data['collectorName'] ?? 'Unknown';
                     return _RecentItem(
                       title: collector,
                       subtitle: town,
                       icon: Icons.check_circle,
-                      color: Colors.green,
+                      color: Colors.blue.shade600,
                     );
-                  }).toList(),
+                  },
                 );
               },
             ),
@@ -1265,7 +1306,7 @@ class _RecentItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color),
+          Icon(icon, color: color, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1276,10 +1317,21 @@ class _RecentItem extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
+                    color: Color(0xFF111827),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF4B5563),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),

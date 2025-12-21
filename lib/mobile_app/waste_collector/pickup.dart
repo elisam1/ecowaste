@@ -1203,7 +1203,11 @@ class _PickupManagementPageState extends State<PickupManagementPage>
   }
 
   // Firebase Operations
-  Future<void> _updateRequestStatus(String requestId, String newStatus, {int? price}) async {
+  Future<void> _updateRequestStatus(
+    String requestId,
+    String newStatus, {
+    int? price,
+  }) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
       final updateData = {
@@ -1341,7 +1345,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
   // Dialog Methods
   void _showAcceptDialog(String requestId) {
     TextEditingController priceController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1354,7 +1358,11 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 color: AppColors.blue.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.check_circle, color: AppColors.blue, size: 24),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.blue,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             const Text('Set Your Pickup Rate'),
@@ -1371,7 +1379,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
             const SizedBox(height: 16),
             TextField(
               controller: priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 hintText: 'Enter amount in GHS',
                 prefixText: 'GHS ',
@@ -1386,15 +1396,24 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.blue, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.blue,
+                    width: 1.5,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.indigo, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppColors.indigo,
+                    width: 2,
+                  ),
                 ),
                 filled: true,
                 fillColor: AppColors.mutedSurface,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
@@ -1404,7 +1423,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
               decoration: BoxDecoration(
                 color: AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.3),
+                ),
               ),
               child: const Row(
                 children: [
@@ -1428,28 +1449,35 @@ class _PickupManagementPageState extends State<PickupManagementPage>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               final price = double.tryParse(priceController.text);
               if (price != null && price > 0) {
                 Navigator.pop(context);
-                _updateRequestStatus(requestId, 'accepted', price: price.toInt());
+                _updateRequestStatus(
+                  requestId,
+                  'accepted',
+                  price: price.toInt(),
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Row(
                       children: [
                         const Icon(Icons.check_circle, color: Colors.white),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: Text('Pickup accepted at GHS $price'),
-                        ),
+                        Expanded(child: Text('Pickup accepted at GHS $price')),
                       ],
                     ),
                     backgroundColor: AppColors.blue,
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 );
               } else {
@@ -1463,7 +1491,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.blue,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: const Text('Accept at This Rate'),
           ),
