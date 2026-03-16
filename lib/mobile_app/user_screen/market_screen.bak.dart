@@ -322,7 +322,6 @@ class _MarketScreenState extends State<MarketScreen> {
           bottom: 32.0,
         ), // Move FAB up above bottom bar
         child: FloatingActionButton(
-          heroTag: 'market_add_item_fab',
           onPressed: () {
             Navigator.pushNamed(context, '/add-item');
           },

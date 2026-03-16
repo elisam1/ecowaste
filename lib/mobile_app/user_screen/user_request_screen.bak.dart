@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_application_1/mobile_app/chat_page/chat_page.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
@@ -302,7 +302,6 @@ class _UserRequestsScreenState extends State<UserRequestsScreen>
         child: Padding(
           padding: const EdgeInsets.only(bottom: 32.0),
           child: FloatingActionButton.extended(
-            heroTag: 'user_requests_new_pickup_fab',
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.wastepickupformupdated);
             },

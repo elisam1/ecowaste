@@ -410,11 +410,15 @@ class _CollectorRatingDialogState extends State<CollectorRatingDialog>
       final ratingService = CollectorRatingService();
 
       final categories = <String, int>{};
-      if (_punctualityRating > 0)
+      if (_punctualityRating > 0) {
         categories['punctuality'] = _punctualityRating;
-      if (_professionalismRating > 0)
+      }
+      if (_professionalismRating > 0) {
         categories['professionalism'] = _professionalismRating;
-      if (_handlingRating > 0) categories['handling'] = _handlingRating;
+      }
+      if (_handlingRating > 0) {
+        categories['handling'] = _handlingRating;
+      }
 
       await ratingService.submitRating(
         collectorId: widget.collectorId,

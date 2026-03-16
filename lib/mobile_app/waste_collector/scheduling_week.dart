@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class WeeklySchedulingPage extends StatefulWidget {
   final String collectorId;
@@ -154,7 +154,6 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
         'schedule': currentSchedule,
       }, SetOptions(merge: true));
     } catch (e) {
-
       // Fallback to the original method if there's an error
       await _collectorDoc.set({
         'schedule': {key: towns},
@@ -255,7 +254,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
               'Weekly schedule saved successfully! Schedule has been reset.',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: AppColors.danger,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -272,7 +271,7 @@ class _WeeklySchedulingPageState extends State<WeeklySchedulingPage>
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-if (!mounted) return;
+      if (!mounted) return;
 
       // Show error message
       if (context.mounted) {
@@ -460,7 +459,9 @@ if (!mounted) return;
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
       child: Card(
         elevation: isToday ? 6 : 2,
-        shadowColor: isToday ? Colors.blue.withValues(alpha: 0.3) : Colors.black26,
+        shadowColor: isToday
+            ? Colors.blue.withValues(alpha: 0.3)
+            : Colors.black26,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
@@ -934,7 +935,7 @@ if (!mounted) return;
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade600,
+                          backgroundColor: AppColors.danger,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
@@ -957,10 +958,3 @@ if (!mounted) return;
     );
   }
 }
-
-
-
-
-
-
-

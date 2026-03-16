@@ -90,10 +90,7 @@ class _RedesignedHomePageState extends State<RedesignedHomePage>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'home_redesign_notifications_fab',
-        onPressed: () {
-          // TODO: Navigate to notifications screen
-        },
+        onPressed: () {},
         label: const Text('Notifications'),
         icon: Icon(
           Icons.notifications_outlined,

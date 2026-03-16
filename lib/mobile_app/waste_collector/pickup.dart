@@ -370,17 +370,18 @@ class _PickupManagementPageState extends State<PickupManagementPage>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
-            colors: [Color(0xFF26A69A), Color(0xFF42A5F5)],
+            colors: [AppColors.danger, Color(0xFFB71C1C)],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF26A69A).withValues(alpha: 0.3),
+              color: AppColors.danger.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         child: FloatingActionButton.extended(
+          heroTag: 'collector_pickup_chat_fab',
           onPressed: () => Navigator.pushNamed(context, AppRoutes.chatlistpage),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -1179,9 +1180,9 @@ class _PickupManagementPageState extends State<PickupManagementPage>
       case 'confirmed':
         return Colors.blue;
       case 'completed':
-        return Colors.green;
+        return AppColors.danger;
       case 'cancelled':
-        return Colors.red;
+        return Colors.red.shade900;
       default:
         return Colors.grey;
     }
@@ -1302,7 +1303,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
             content: Text(
               'Request ${newStatus.replaceAll('_', ' ')} successfully',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -1329,7 +1330,7 @@ class _PickupManagementPageState extends State<PickupManagementPage>
       messenger.showSnackBar(
         const SnackBar(
           content: Text('Completed request deleted successfully'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.danger,
         ),
       );
     } catch (e) {
@@ -1474,10 +1475,6 @@ class _PickupManagementPageState extends State<PickupManagementPage>
                       ],
                     ),
                     backgroundColor: AppColors.blue,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                   ),
                 );
               } else {

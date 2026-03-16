@@ -430,6 +430,10 @@ class _SignInScreenState extends State<SignInScreen>
           AppRoutes.collectorHome,
           arguments: {'role': 'collector', 'collectorId': uid},
         );
+
+        // Stop here so we don't also run the user lookup
+        // and fall through to the generic "role not found" message.
+        return;
       }
 
       // Step 3: Try to get from 'users' collection
@@ -444,11 +448,24 @@ class _SignInScreenState extends State<SignInScreen>
         });
 
         if (!mounted) return;
-        Navigator.pushNamed(
-          context,
-          AppRoutes.home,
-          arguments: {'role': 'User', 'userId': uid},
-        );
+
+        final data =
+            userSnapshot.data() as Map<String, dynamic>? ?? <String, dynamic>{};
+        final role = (data['role'] as String?)?.toLowerCase() ?? 'user';
+
+        if (role == 'collector') {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.collectorHome,
+            arguments: {'role': 'collector', 'collectorId': uid},
+          );
+        } else {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.home,
+            arguments: {'role': 'User', 'userId': uid},
+          );
+        }
         return;
       }
 

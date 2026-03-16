@@ -14,6 +14,7 @@ import 'package:flutter_application_1/mobile_app/waste_collector/pending_summary
 import 'package:flutter_application_1/mobile_app/waste_collector/pickup.dart';
 import 'package:flutter_application_1/mobile_app/waste_collector/profile_screen.dart';
 import 'package:flutter_application_1/mobile_app/waste_collector/notification_page.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 //import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
@@ -187,7 +188,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                   ? 'You are now active and available for pickups'
                   : 'You are now inactive',
             ),
-            backgroundColor: value ? Colors.green : Colors.orange,
+            backgroundColor: value ? AppColors.danger : Colors.orange,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -216,78 +217,19 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         automaticallyImplyLeading: false,
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Text(
-            //   'Hi,',
-            //   style: TextStyle(
-            //     fontSize: 14,
-            //     color: Colors.grey[600],
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
-            Text(
-              " ${collectorName ?? 'Guest'}",
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Collector Home',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
-          // Active Status Switch
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isActive ? Colors.green : Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isActive ? Colors.green : Colors.grey[400],
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: isActive,
-                    onChanged: _updateActiveStatus,
-                    thumbColor: WidgetStateProperty.all(Colors.green),
-                    trackColor: WidgetStateProperty.resolveWith(
-                      (states) => isActive
-                          ? Colors.green.withValues(alpha: 0.3)
-                          : Colors.grey[300],
-                    ),
-                    inactiveThumbColor: Colors.grey[400],
-                    inactiveTrackColor: Colors.grey[300],
-                  ),
-                ),
-              ],
-            ),
-          ),
           // Notification Icon
           Consumer<NotificationProvider>(
             builder: (context, notificationProvider, child) {
+              final count = notificationProvider.unreadCount;
               return Stack(
                 children: [
                   IconButton(
@@ -299,14 +241,14 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                       Navigator.pushNamed(context, '/collector-notifications');
                     },
                   ),
-                  if (notificationProvider.unreadCount > 0)
+                  if (count > 0)
                     Positioned(
                       right: 8,
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: AppColors.danger,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         constraints: const BoxConstraints(
@@ -315,15 +257,12 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                         ),
                         child: Center(
                           child: Text(
-                            notificationProvider.unreadCount > 99
-                                ? '99+'
-                                : notificationProvider.unreadCount.toString(),
+                            count > 99 ? '99+' : count.toString(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -346,6 +285,8 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildHeaderSection(collectorName),
+              const SizedBox(height: 16),
               // Summary Cards Row
               SummaryCardsRow(collectorId: collectorId),
 
@@ -392,17 +333,18 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
-            colors: [Color(0xFF26A69A), Color(0xFF42A5F5)],
+            colors: [AppColors.danger, Color(0xFFB71C1C)],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF26A69A).withAlpha((0.3 * 255).toInt()),
+              color: AppColors.danger.withAlpha((0.3 * 255).toInt()),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         child: FloatingActionButton.extended(
+          heroTag: 'collector_home_chat_fab',
           onPressed: () => Navigator.pushNamed(context, AppRoutes.chatlistpage),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -421,6 +363,105 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderSection(String? collectorName) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.danger.withValues(alpha: 0.95),
+            AppColors.danger,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Welcome back,',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  collectorName ?? 'Collector',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Manage today\'s pickups, routes, and earnings',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isActive ? Colors.greenAccent : Colors.grey[400],
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isActive ? 'Active' : 'Inactive',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Transform.scale(
+                scale: 0.85,
+                child: Switch(
+                  value: isActive,
+                  onChanged: _updateActiveStatus,
+                  thumbColor: WidgetStateProperty.all(Colors.white),
+                  trackColor: WidgetStateProperty.resolveWith(
+                    (states) => Colors.white.withValues(
+                      alpha: isActive ? 0.45 : 0.25,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -665,7 +706,8 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                                       vertical: 1,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.shade200,
+                                      color: AppColors.danger
+                                          .withValues(alpha: 0.18),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Row(
@@ -674,7 +716,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                                         Icon(
                                           Icons.local_shipping,
                                           size: 8,
-                                          color: Colors.green.shade800,
+                                          color: AppColors.danger,
                                         ),
                                         const SizedBox(width: 1),
                                         Text(
@@ -682,7 +724,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                                           style: TextStyle(
                                             fontSize: 9,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade800,
+                                            color: AppColors.danger,
                                           ),
                                         ),
                                       ],
@@ -823,10 +865,10 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                 // Pickup Requests Section
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.local_shipping,
                       size: 20,
-                      color: Colors.green[700],
+                      color: AppColors.danger,
                     ),
                     const SizedBox(width: 8),
                     const Text(
@@ -843,11 +885,13 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: pickupCount > 0 ? Colors.green[50] : Colors.grey[50],
+                    color: pickupCount > 0
+                        ? AppColors.danger.withValues(alpha: 0.04)
+                        : Colors.grey[50],
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: pickupCount > 0
-                          ? Colors.green[200]!
+                          ? AppColors.danger.withValues(alpha: 0.3)
                           : Colors.grey[200]!,
                       width: 1,
                     ),
@@ -860,7 +904,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                             : Icons.info_outline,
                         size: 16,
                         color: pickupCount > 0
-                            ? Colors.green[700]
+                            ? AppColors.danger
                             : Colors.grey[600],
                       ),
                       const SizedBox(width: 8),
@@ -871,7 +915,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                         style: TextStyle(
                           fontSize: 14,
                           color: pickupCount > 0
-                              ? Colors.green[800]
+                              ? AppColors.danger
                               : Colors.grey[700],
                           fontWeight: FontWeight.w500,
                         ),
@@ -940,7 +984,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[600],
+                  backgroundColor: AppColors.danger,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1295,7 +1339,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                 children: [
                   _buildStatusItem('Pending', pendingCount, Colors.orange),
                   // _buildStatusItem('Confirmed', confirmedCount, Colors.blue),
-                  _buildStatusItem('Completed', completedCount, Colors.green),
+                  _buildStatusItem('Completed', completedCount, AppColors.danger),
                 ],
               ),
             ],
@@ -1428,7 +1472,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.green[400]!, Colors.green[600]!],
+          colors: [AppColors.danger.withValues(alpha: 0.85), AppColors.danger],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1669,7 +1713,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         _buildQuickActionItem(
           title: 'View Requests',
           icon: Icons.inbox,
-          color: Colors.blue,
+          color: AppColors.danger,
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -1681,7 +1725,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         _buildQuickActionItem(
           title: 'Start Route',
           icon: Icons.navigation,
-          color: Colors.green,
+          color: AppColors.danger,
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -1830,12 +1874,12 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withAlpha((0.1 * 255).toInt()),
+                      color: AppColors.danger.withAlpha((0.08 * 255).toInt()),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.check_circle,
-                      color: Colors.green,
+                      color: AppColors.danger,
                       size: 20,
                     ),
                   ),
@@ -1864,7 +1908,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                                       : '',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green,
+                                    color: AppColors.danger,
                                     fontSize: 14,
                                   ),
                                 ),

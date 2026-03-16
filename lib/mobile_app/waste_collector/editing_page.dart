@@ -1,6 +1,7 @@
 ﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:provider/provider.dart';
 
@@ -190,7 +191,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Profile updated successfully!'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.danger,
               duration: Duration(seconds: 3),
             ),
           );
@@ -233,7 +234,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
           'Edit Profile',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.green[700],
+        backgroundColor: AppColors.danger,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -263,11 +264,11 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                   children: [
                     CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.green[100],
+                      backgroundColor: AppColors.danger.withValues(alpha: 0.08),
                       child: Icon(
                         Icons.person,
                         size: 50,
-                        color: Colors.green[700],
+                        color: AppColors.danger,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -305,7 +306,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.person_outline, color: Colors.green[700]),
+                        Icon(Icons.person_outline, color: AppColors.danger),
                         const SizedBox(width: 8),
                         Text(
                           'Personal Information',
@@ -331,7 +332,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.green[700]!),
+                          borderSide: BorderSide(color: AppColors.danger),
                         ),
                       ),
                       validator: _validateUsername,
@@ -352,7 +353,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.green[700]!),
+                          borderSide: BorderSide(color: AppColors.danger),
                         ),
                       ),
                       validator: _validateEmail,
@@ -372,7 +373,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.green[700]!),
+                          borderSide: BorderSide(color: AppColors.danger),
                         ),
                       ),
                       validator: _validateTown,
@@ -390,7 +391,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.green[700]!),
+                          borderSide: BorderSide(color: AppColors.danger),
                         ),
                       ),
                       validator: _validatePhoneNumber,
@@ -424,7 +425,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.lock_outline, color: Colors.green[700]),
+                            Icon(Icons.lock_outline, color: AppColors.danger),
                             const SizedBox(width: 8),
                             Text(
                               'Change Password',
@@ -448,9 +449,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                               }
                             });
                           },
-                          thumbColor: WidgetStateProperty.all(
-                            Colors.green[700],
-                          ),
+                          thumbColor: WidgetStateProperty.all(AppColors.danger),
                         ),
                       ],
                     ),
@@ -484,7 +483,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.green[700]!),
+                            borderSide: BorderSide(color: AppColors.danger),
                           ),
                         ),
                         validator: _validateCurrentPassword,
@@ -517,7 +516,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.green[700]!),
+                            borderSide: BorderSide(color: AppColors.danger),
                           ),
                         ),
                         validator: _validateNewPassword,
@@ -551,7 +550,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.green[700]!),
+                            borderSide: BorderSide(color: AppColors.danger),
                           ),
                         ),
                         validator: _validateConfirmPassword,
@@ -603,7 +602,7 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[700],
+                    backgroundColor: AppColors.danger,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -656,5 +655,3 @@ class _CollectorProfileEditPageState extends State<CollectorProfileEditPage> {
     );
   }
 }
-
-

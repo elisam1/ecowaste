@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class BuyerFormScreen extends StatefulWidget {
   final Map<String, dynamic> itemData;
@@ -259,7 +259,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         isFreeItem
             ? 'Item claimed successfully! The seller will contact you shortly.'
             : 'Purchase initiated! You will receive payment confirmation shortly.',
-        Colors.green,
+        AppColors.indigo,
       );
 
       // Return success to previous screen
@@ -620,7 +620,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                                 : 'GHS ${widget.itemData['price']}',
                             style: TextStyle(
                               color: isFreeItem
-                                  ? Colors.green
+                                  ? AppColors.indigo
                                   : Colors.blue[700],
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -710,7 +710,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                           children: [
                             Icon(
                               Icons.mobile_friendly,
-                              color: Colors.green[600],
+                              color: AppColors.indigo,
                               size: 24,
                             ),
                             const SizedBox(width: 12),
@@ -727,19 +727,24 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: AppColors.indigo.withValues(alpha: 0.04),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green[200]!),
+                          border: Border.all(
+                            color: AppColors.indigo.withValues(alpha: 0.25),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, color: Colors.green[700]),
+                            const Icon(
+                              Icons.info_outline,
+                              color: AppColors.indigo,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Payment will be sent directly to the seller\'s mobile money number',
                                 style: TextStyle(
-                                  color: Colors.green[700],
+                                  color: AppColors.indigo,
                                   fontSize: 14,
                                 ),
                               ),
@@ -807,7 +812,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _processPurchase,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.indigo,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -928,7 +933,7 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.mobile_friendly, color: Colors.green[600]),
+              const Icon(Icons.mobile_friendly, color: AppColors.indigo),
               const SizedBox(width: 8),
               const Text(
                 'Mobile Money Payment Details',
@@ -1052,29 +1057,31 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.green[50],
+              color: AppColors.indigo.withValues(alpha: 0.04),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green[200]!),
+              border: Border.all(
+                color: AppColors.indigo.withValues(alpha: 0.25),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Payment Instructions:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[800],
+                    color: AppColors.indigo,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   '1. Enter your MoMo number above\n'
                   '2. Click "Complete Purchase" to proceed\n'
                   '3. You will receive a payment prompt on your phone\n'
                   '4. Enter your MoMo PIN to authorize payment\n'
-                  '5. Payment will be sent directly to $sellerName\n'
+                  '5. Payment will be sent directly to the seller\n'
                   '6. You will receive confirmation SMS',
-                  style: TextStyle(color: Colors.green[700], fontSize: 12),
+                  style: TextStyle(color: AppColors.indigo, fontSize: 12),
                 ),
               ],
             ),
@@ -1084,4 +1091,3 @@ class _BuyerFormScreenState extends State<BuyerFormScreen> {
     );
   }
 }
-

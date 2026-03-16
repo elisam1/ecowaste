@@ -348,11 +348,10 @@ class _SettingsScreenState extends State<SettingsScreen>
               onPressed: () async {
                 Navigator.of(context).pop();
                 await FirebaseAuth.instance.signOut();
-                if (mounted) {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false);
-                }
+                if (!mounted) return;
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil(AppRoutes.signIn, (route) => false);
               },
               child: const Text(
                 'Sign Out',

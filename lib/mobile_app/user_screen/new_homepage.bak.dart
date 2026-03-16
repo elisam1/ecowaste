@@ -1,9 +1,8 @@
-﻿// ignore_for_file: unused_import, duplicate_ignore
+// ignore_for_file: unused_import, duplicate_ignore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/provider/notification_provider.dart';
 //import 'package:flutter_application_1/mobile_app/provider/sort_score_provider.dart';
@@ -113,7 +112,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [AppColors.indigo, AppColors.blue, AppColors.sky],
+                    colors: [
+                      Color.fromARGB(255, 47, 143, 84),
+                      Color.fromARGB(255, 48, 226, 140),
+                      Color.fromARGB(255, 32, 102, 95),
+                    ],
                   ),
                 ),
                 child: SafeArea(
@@ -303,18 +306,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
-            colors: [AppColors.indigo, AppColors.blue],
+            colors: [Color(0xFF26A69A), Color(0xFF42A5F5)],
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.indigo.withValues(alpha: 0.3),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         child: FloatingActionButton.extended(
-          heroTag: 'legacy_home_quick_chat_fab',
           onPressed: () => Navigator.pushNamed(context, AppRoutes.chatlistpage),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -350,12 +352,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.indigo, AppColors.blue, AppColors.sky],
+          colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF388E3C)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.indigo.withValues(alpha: 0.3),
+            color: const Color(0xFF1B5E20).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -535,7 +537,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: Color(0xFF1B5E20),
           ),
         ),
         const SizedBox(height: 16),
@@ -589,7 +591,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       : 'No pickup in progress',
                   Icons.track_changes_rounded,
                   hasInProgress
-                      ? [AppColors.indigo, AppColors.blue]
+                      ? [const Color(0xFF388E3C), const Color(0xFF4CAF50)]
                       : [const Color(0xFF9E9E9E), const Color(0xFFBDBDBD)],
                   '',
                   onTap: hasInProgress
@@ -737,7 +739,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: Color(0xFF1B5E20),
                     ),
                   ),
                 ],
@@ -785,7 +787,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     userTown,
                     'Completed â€¢ $timeAgo',
                     Icons.check_circle,
-                    AppColors.indigo,
+                    Colors.green,
                   );
                 }).toList(),
               );
@@ -839,7 +841,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: Color(0xFF1B5E20),
                   ),
                 ),
                 Text(
@@ -883,12 +885,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.blue.withValues(alpha: 0.12),
+                  color: Colors.green.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline_rounded,
-                  color: AppColors.indigo,
+                  color: Colors.green.shade700,
                 ),
               ),
               const SizedBox(width: 12),
@@ -897,7 +899,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: Color(0xFF1B5E20),
                 ),
               ),
             ],
@@ -932,10 +934,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.indigo.withValues(alpha: 0.08),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, color: AppColors.indigo, size: 16),
+            child: Icon(icon, color: const Color(0xFF26A69A), size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -947,7 +949,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: Color(0xFF1B5E20),
                   ),
                 ),
                 const SizedBox(height: 4),

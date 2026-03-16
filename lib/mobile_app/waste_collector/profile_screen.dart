@@ -1,5 +1,6 @@
 ﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/provider/provider.dart';
 import 'package:flutter_application_1/mobile_app/routes/app_route.dart';
 import 'package:flutter_application_1/mobile_app/waste_collector/pending_summary.dart';
@@ -90,7 +91,9 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
-                                  color: Colors.green[400],
+                                  color: AppColors.danger.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -109,10 +112,10 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
                                   ),
                                   child: IconButton(
                                     onPressed: () {},
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.camera_alt,
                                       size: 16,
-                                      color: Colors.green,
+                                      color: AppColors.danger,
                                     ),
                                     iconSize: 16,
                                     padding: const EdgeInsets.all(4),
@@ -203,7 +206,7 @@ class _CollectorProfileScreenState extends State<CollectorProfileScreen> {
                           CollectorTotalPickupsText(collectorId: collectorId),
 
                           'Total Pickups',
-                          Colors.green,
+                          AppColors.danger,
                         ),
                       ),
                       const SizedBox(width: 16),

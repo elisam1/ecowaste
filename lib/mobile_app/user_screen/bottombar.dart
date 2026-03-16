@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/chat_screen.dart';
 import 'package:flutter_application_1/mobile_app/user_screen/home_redesign.dart';
@@ -23,6 +24,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final log = Logger();
 
   late AnimationController _animationController;
+  bool _showNavBar = true;
+  double _lastOffset = 0;
+  late ScrollController _scrollController;
 
   // Navigation items data
   static const List<_NavItem> _navItems = [
@@ -65,11 +69,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+    _scrollController = ScrollController();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  void _handleScroll() {
+    final offset = _scrollController.position.pixels;
+    if (offset > _lastOffset + 10 && _showNavBar) {
+      setState(() => _showNavBar = false);
+    } else if (offset < _lastOffset - 10 && !_showNavBar) {
+      setState(() => _showNavBar = true);
+    }
+    _lastOffset = offset;
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -85,22 +102,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      UserRequestsScreen(userId: FirebaseAuth.instance.currentUser?.uid ?? ''),
-      const MarketScreen(),
-      RedesignedHomePage(onTrackTap: () => _onItemTapped(3)),
-      const TrackingScreen(),
-      const ChatScreen(),
-      const ProfileScreen(),
+      UserRequestsScreen(
+        userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+        key: const PageStorageKey('pickups'),
+      ),
+      const MarketScreen(key: PageStorageKey('market')),
+      RedesignedHomePage(
+        onTrackTap: () => _onItemTapped(3),
+        key: const PageStorageKey('home'),
+      ),
+      const TrackingScreen(key: PageStorageKey('track')),
+      const ChatScreen(key: PageStorageKey('chat')),
+      const ProfileScreen(key: PageStorageKey('profile')),
     ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true, // Important for floating effect
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: screens[_currentIndex],
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapDown: (details) {
+          final size = MediaQuery.of(context).size;
+          if (details.globalPosition.dy > size.height - 100 && !_showNavBar) {
+            setState(() => _showNavBar = true);
+          }
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification is UserScrollNotification) {
+              if (notification.direction == AxisDirection.down && _showNavBar) {
+                setState(() => _showNavBar = false);
+              } else if (notification.direction == AxisDirection.up &&
+                  !_showNavBar) {
+                setState(() => _showNavBar = true);
+              }
+            }
+            return false;
+          },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: screens[_currentIndex],
+          ),
+        ),
       ),
-      bottomNavigationBar: _buildFloatingNavBar(),
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 350),
+        offset: _showNavBar ? Offset.zero : const Offset(0, 1),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 350),
+          opacity: _showNavBar ? 1 : 0,
+          child: _buildFloatingNavBar(),
+        ),
+      ),
     );
   }
 

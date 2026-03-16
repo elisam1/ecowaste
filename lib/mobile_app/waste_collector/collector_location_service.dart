@@ -96,6 +96,7 @@ class CollectorLocationService {
     Position position,
   ) async {
     try {
+      // Primary location store used by tracking UIs
       await FirebaseFirestore.instance
           .collection('collector_locations')
           .doc(collectorId)
@@ -108,6 +109,25 @@ class CollectorLocationService {
             'timestamp': FieldValue.serverTimestamp(),
             'isActive': true,
           }, SetOptions(merge: true));
+
+      // Mirror basic location into collectors collection for services
+      // (for example AdvancedTrackingService and analytics).
+      try {
+        await FirebaseFirestore.instance
+            .collection('collectors')
+            .doc(collectorId)
+            .update({
+              'currentLocation': {
+                'latitude': position.latitude,
+                'longitude': position.longitude,
+                'accuracy': position.accuracy,
+                'timestamp': FieldValue.serverTimestamp(),
+              },
+              'lastLocationUpdate': FieldValue.serverTimestamp(),
+            });
+      } catch (e) {
+        // Ignore mirror failures to avoid breaking live tracking
+      }
     } catch (e) {}
   }
 
@@ -131,5 +151,48 @@ class CollectorLocationService {
             });
       } catch (e) {}
     }
+
+    // Reset tracking state
+    _isTracking = false;
+    _currentCollectorId = null;
+    _locationTimer = null;
+    _positionStream = null;
+  }
+
+  /// Check Firestore to determine if there are active pickups that
+  /// require location tracking for this collector.
+  Future<bool> shouldTrackLocation(String collectorId) async {
+    try {
+      final activeRequests = await FirebaseFirestore.instance
+          .collection('pickup_requests')
+          .where('collectorId', isEqualTo: collectorId)
+          .where('status', whereIn: ['accepted', 'in_progress'])
+          .get();
+
+      return activeRequests.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Start/stop tracking automatically based on active pickup requests.
+  Future<void> updateTrackingBasedOnRequests(String collectorId) async {
+    final shouldTrack = await shouldTrackLocation(collectorId);
+
+    if (shouldTrack && !_isTracking) {
+      await startLocationTracking(collectorId);
+    } else if (!shouldTrack &&
+        _isTracking &&
+        _currentCollectorId == collectorId) {
+      await stopLocationTracking();
+    }
+  }
+
+  /// Expose current tracking status and active collector id.
+  bool get isTracking => _isTracking;
+  String? get currentCollectorId => _currentCollectorId;
+
+  void dispose() {
+    stopLocationTracking();
   }
 }

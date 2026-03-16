@@ -9,169 +9,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
-// Import the location service (you'll need to add this file to your project)
-// import 'collector_location_service.dart';
-
-// For now, I'll include the CollectorLocationService class here
-class CollectorLocationService {
-  static CollectorLocationService? _instance;
-  CollectorLocationService._internal();
-
-  static CollectorLocationService get instance {
-    _instance ??= CollectorLocationService._internal();
-    return _instance!;
-  }
-
-  Timer? _locationTimer;
-  String? _currentCollectorId;
-  bool _isTracking = false;
-  StreamSubscription<Position>? _positionStream;
-
-  Future<void> startLocationTracking(String collectorId) async {
-    if (_isTracking && _currentCollectorId == collectorId) {
-      return;
-    }
-
-    await stopLocationTracking();
-    _currentCollectorId = collectorId;
-    _isTracking = true;
-
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('Location services are disabled');
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('Location permissions are denied');
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        throw Exception('Location permissions are permanently denied');
-      }
-
-      _startLocationStream(collectorId);
-      _startPeriodicUpdates(collectorId);
-    } catch (e) {
-      _isTracking = false;
-      _currentCollectorId = null;
-      rethrow;
-    }
-  }
-
-  void _startLocationStream(String collectorId) {
-    const LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-    );
-
-    _positionStream =
-        Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-          (Position position) {
-            _updateCollectorLocation(collectorId, position);
-          },
-          onError: (error) {},
-        );
-  }
-
-  void _startPeriodicUpdates(String collectorId) {
-    _locationTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
-      try {
-        final position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-          timeLimit: const Duration(seconds: 10),
-        );
-        _updateCollectorLocation(collectorId, position);
-      } catch (e) {
-        // Log location update error but continue tracking
-        print('Error updating location: $e');
-      }
-    });
-  }
-
-  Future<void> _updateCollectorLocation(
-    String collectorId,
-    Position position,
-  ) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('collector_locations')
-          .doc(collectorId)
-          .set({
-            'latitude': position.latitude,
-            'longitude': position.longitude,
-            'accuracy': position.accuracy,
-            'speed': position.speed,
-            'heading': position.heading,
-            'timestamp': FieldValue.serverTimestamp(),
-            'isActive': true,
-          }, SetOptions(merge: true));
-    } catch (e) {
-      print('Error updating collector location in Firestore: $e');
-    }
-  }
-
-  Future<void> stopLocationTracking() async {
-    if (!_isTracking) return;
-
-    _locationTimer?.cancel();
-    _positionStream?.cancel();
-
-    if (_currentCollectorId != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('collector_locations')
-            .doc(_currentCollectorId!)
-            .update({
-              'isActive': false,
-              'lastActiveAt': FieldValue.serverTimestamp(),
-            });
-      } catch (e) {}
-    }
-
-    _isTracking = false;
-    _currentCollectorId = null;
-    _locationTimer = null;
-    _positionStream = null;
-  }
-
-  Future<bool> shouldTrackLocation(String collectorId) async {
-    try {
-      final activeRequests = await FirebaseFirestore.instance
-          .collection('pickup_requests')
-          .where('collectorId', isEqualTo: collectorId)
-          .where('status', whereIn: ['accepted', 'in_progress'])
-          .get();
-
-      return activeRequests.docs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<void> updateTrackingBasedOnRequests(String collectorId) async {
-    final shouldTrack = await shouldTrackLocation(collectorId);
-
-    if (shouldTrack && !_isTracking) {
-      await startLocationTracking(collectorId);
-    } else if (!shouldTrack &&
-        _isTracking &&
-        _currentCollectorId == collectorId) {
-      await stopLocationTracking();
-    }
-  }
-
-  bool get isTracking => _isTracking;
-  String? get currentCollectorId => _currentCollectorId;
-
-  void dispose() {
-    stopLocationTracking();
-  }
-}
+// Shared collector location tracking service
+import 'collector_location_service.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class CollectorMapScreen extends StatefulWidget {
   final String collectorId;
@@ -193,6 +33,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
   double? _nearestDistance;
   Timer? _refreshTimer;
   StreamSubscription<QuerySnapshot>? _requestsListener;
+  String? _activeRequestId;
+  Map<String, dynamic>? _activeRequestData;
+  bool _hasAnyRequests = false;
 
   // Add your Google Maps API key here
   static const String _googleMapsApiKey =
@@ -239,7 +82,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Location tracking started for active pickups'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.danger,
               duration: Duration(seconds: 3),
             ),
           );
@@ -288,6 +131,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
     Set<Marker> newRequestMarkers = {};
     _markers.removeWhere((m) => m.markerId.value != 'collector');
 
+    Map<String, dynamic>? activeData;
+    String? activeId;
+
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
       final userLatitude = data['userLatitude'];
@@ -308,6 +154,12 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
         // Check if pickup is scheduled for today
         final isTodayPickup = _isPickupToday(data['pickupDate']);
         final pickupDateText = _formatPickupDate(data['pickupDate']);
+
+        // Track first in-progress request as the "active job"
+        if (data['status'] == 'in_progress' && activeId == null) {
+          activeId = doc.id;
+          activeData = data;
+        }
 
         // Determine marker color based on status and date
         BitmapDescriptor markerIcon;
@@ -352,6 +204,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
 
     setState(() {
       _markers = {..._markers, ...newRequestMarkers};
+      _activeRequestId = activeId;
+      _activeRequestData = activeData;
+      _hasAnyRequests = snapshot.docs.isNotEmpty;
     });
 
     // Recalculate nearest location
@@ -500,7 +355,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             content: Text(
               'Location updated (±${position.accuracy.toInt()}m accuracy)',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.danger,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -575,6 +430,8 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
       int validRequests = 0;
       int invalidRequests = 0;
       _markers.removeWhere((m) => m.markerId.value != 'collector');
+      Map<String, dynamic>? activeData;
+      String? activeId;
 
       for (var doc in snapshot.docs) {
         final data = doc.data();
@@ -609,6 +466,12 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
         // Check if pickup is scheduled for today
         final isTodayPickup = _isPickupToday(data['pickupDate']);
         final pickupDateText = _formatPickupDate(data['pickupDate']);
+
+        // Track first in-progress request as the "active job"
+        if (data['status'] == 'in_progress' && activeId == null) {
+          activeId = doc.id;
+          activeData = data;
+        }
 
         // Determine marker color based on status and date
         BitmapDescriptor markerIcon;
@@ -650,6 +513,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
 
       setState(() {
         _markers = {..._markers, ...requestMarkers};
+        _activeRequestId = activeId;
+        _activeRequestData = activeData;
+        _hasAnyRequests = requestMarkers.isNotEmpty;
       });
 
       if (mounted) {
@@ -661,7 +527,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: invalidRequests > 0 ? Colors.orange : Colors.green,
+            backgroundColor: invalidRequests > 0
+                ? Colors.orange
+                : AppColors.danger,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -717,7 +585,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
               'Route to nearest pickup: ${nearestLocationName ?? 'Unknown'} '
               '(${(nearestDistance / 1000).toStringAsFixed(2)} km away)',
             ),
-            backgroundColor: Colors.blue,
+            backgroundColor: AppColors.danger,
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'Navigate',
@@ -762,7 +630,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Route loaded: $distance, $duration'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.danger,
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -825,7 +693,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
     final Polyline route = Polyline(
       polylineId: const PolylineId('nearest_route'),
       points: routeCoords,
-      color: Colors.blue,
+      color: AppColors.danger,
       width: 6,
       startCap: Cap.roundCap,
       endCap: Cap.roundCap,
@@ -854,7 +722,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
     final Polyline route = Polyline(
       polylineId: const PolylineId('nearest_route'),
       points: routePoints,
-      color: Colors.blue,
+      color: AppColors.danger,
       width: 5,
       patterns: [PatternItem.dash(20), PatternItem.gap(10)],
       startCap: Cap.roundCap,
@@ -971,7 +839,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                   icon: const Icon(Icons.map),
                   label: const Text('Google Maps'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppColors.danger,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -980,7 +848,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                   icon: const Icon(Icons.navigation),
                   label: const Text('Waze'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.danger,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -1024,7 +892,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                   decoration: BoxDecoration(
                     color: data['status'] == 'in_progress'
                         ? Colors.orange.withValues(alpha: 0.2)
-                        : Colors.green.withValues(alpha: 0.2),
+                        : AppColors.danger.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1034,7 +902,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                     style: TextStyle(
                       color: data['status'] == 'in_progress'
                           ? Colors.orange
-                          : Colors.green,
+                          : AppColors.danger,
                       fontWeight: FontWeight.bold,
                       fontSize: 11,
                     ),
@@ -1136,8 +1004,10 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                       icon: const Icon(Icons.directions),
                       label: const Text('Navigate'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.danger.withValues(
+                          alpha: 0.1,
+                        ),
+                        foregroundColor: AppColors.danger,
                       ),
                     ),
                   ),
@@ -1165,7 +1035,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                       icon: const Icon(Icons.directions),
                       label: const Text('Navigate'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: AppColors.danger,
                         foregroundColor: Colors.white,
                       ),
                     ),
@@ -1177,7 +1047,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                       icon: const Icon(Icons.check_circle),
                       label: const Text('Complete'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.danger,
                         foregroundColor: Colors.white,
                       ),
                     ),
@@ -1308,13 +1178,13 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.map, color: Colors.blue),
+              leading: Icon(Icons.map, color: AppColors.danger),
               title: const Text('Google Maps'),
               subtitle: const Text('Open in Google Maps app'),
               onTap: () => _openInGoogleMaps(lat, lng, name),
             ),
             ListTile(
-              leading: const Icon(Icons.navigation, color: Colors.green),
+              leading: Icon(Icons.navigation, color: AppColors.danger),
               title: const Text('Waze'),
               subtitle: const Text('Open in Waze app'),
               onTap: () => _openInWaze(lat, lng),
@@ -1373,7 +1243,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
         content: Text(
           'Route shown. Distance: ${(distance / 1000).toStringAsFixed(2)} km',
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.danger,
       ),
     );
   }
@@ -1430,7 +1300,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                 Text('Pickup started! Location tracking is now active.'),
               ],
             ),
-            backgroundColor: Colors.blue,
+            backgroundColor: AppColors.danger,
             duration: Duration(seconds: 4),
           ),
         );
@@ -1459,11 +1329,11 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 8),
-              Text('Mark as Completed'),
+              Icon(Icons.check_circle, color: AppColors.danger),
+              const SizedBox(width: 8),
+              const Text('Mark as Completed'),
             ],
           ),
           content: const Text(
@@ -1477,7 +1347,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.danger,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Complete'),
@@ -1500,9 +1370,56 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             .collection('pickup_requests')
             .doc(requestId)
             .update({
-              'status': 'completed',
+              // Move into pending_confirmation so user can confirm
+              // completion and release payment, matching the main
+              // collector workflow in pickup.dart.
+              'status': 'pending_confirmation',
               'completedAt': FieldValue.serverTimestamp(),
             });
+
+        // Notify the user to confirm completion (same pattern as
+        // _updateRequestStatus in pickup.dart for pending_confirmation).
+        try {
+          final requestDoc = await FirebaseFirestore.instance
+              .collection('pickup_requests')
+              .doc(requestId)
+              .get();
+
+          if (requestDoc.exists) {
+            final requestData = requestDoc.data()!;
+            final userId = requestData['userId'];
+
+            if (userId != null) {
+              final collectorName =
+                  requestData['collectorName'] as String? ?? 'Collector';
+
+              const String title = '🔍 Confirm Pickup Completion';
+              final String message =
+                  '$collectorName has marked your pickup as completed. Please confirm to release payment.';
+
+              await FirebaseFirestore.instance.collection('notifications').add({
+                'userId': userId,
+                'type': 'pickup_status_update',
+                'title': title,
+                'message': message,
+                'data': {
+                  'pickupRequestId': requestId,
+                  'collectorId': widget.collectorId,
+                  'collectorName': collectorName,
+                  'status': 'pending_confirmation',
+                  'userTown': requestData['userTown'],
+                  'pickupDate': requestData['pickupDate'],
+                  'totalAmount': requestData['totalAmount'],
+                  'binCount': requestData['binCount'],
+                },
+                'isRead': false,
+                'createdAt': FieldValue.serverTimestamp(),
+              });
+            }
+          }
+        } catch (e) {
+          // Best-effort: failures here should not block completion
+        }
 
         // Remove marker from map
         setState(() {
@@ -1528,7 +1445,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 8),
-                  const Text('Pickup completed successfully!'),
+                  const Text(
+                    'Pickup marked as completed. Awaiting user confirmation.',
+                  ),
                   const Spacer(),
                   if (!locationService.isTracking)
                     const Text(
@@ -1537,7 +1456,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                     ),
                 ],
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.danger,
               duration: const Duration(seconds: 4),
             ),
           );
@@ -1620,16 +1539,16 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
       await locationService.startLocationTracking(widget.collectorId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
+          SnackBar(
+            content: const Row(
               children: [
                 Icon(Icons.location_on, color: Colors.white),
                 SizedBox(width: 8),
                 Text('Location tracking resumed'),
               ],
             ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            backgroundColor: AppColors.danger,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -1705,12 +1624,14 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: isTracking ? Colors.green : Colors.grey,
+                    color: isTracking
+                        ? AppColors.danger.withValues(alpha: 0.12)
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: isTracking
                         ? [
                             BoxShadow(
-                              color: Colors.green.withValues(alpha: 0.3),
+                              color: AppColors.danger.withValues(alpha: 0.3),
                               blurRadius: 4,
                               spreadRadius: 1,
                             ),
@@ -1741,7 +1662,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
             ),
           ],
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: AppColors.danger,
         foregroundColor: Colors.white,
         actions: [
           if (_nearestLocationId != null)
@@ -1987,8 +1908,8 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                               Container(
                                 width: 16,
                                 height: 16,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.danger,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -2090,14 +2011,15 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.withValues(alpha: 0.1),
+                                      color:
+                                          AppColors.danger.withValues(alpha: 0.06),
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.blue),
+                                      border: Border.all(color: AppColors.danger),
                                     ),
                                     child: Text(
                                       '$futurePickups Future',
                                       style: const TextStyle(
-                                        color: Colors.blue,
+                                        color: AppColors.danger,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
                                       ),
@@ -2173,6 +2095,59 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                     ),
                   ),
 
+                // Empty state overlay when there are no pickup markers
+                if (!_hasAnyRequests)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                Icons.map_outlined,
+                                size: 32,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'No active pickups on your route yet',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'New accepted or in-progress jobs will appear here automatically.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                 // Enhanced location tracking status card
                 Positioned(
                   bottom: 160,
@@ -2186,7 +2161,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                         child: Card(
                           elevation: isTracking ? 8 : 4,
                           color: isTracking
-                              ? Colors.green.shade50
+                              ? AppColors.danger.withValues(alpha: 0.08)
                               : Colors.grey.shade50,
                           child: Padding(
                             padding: const EdgeInsets.all(12),
@@ -2197,7 +2172,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: isTracking
-                                        ? Colors.green
+                                        ? AppColors.danger
                                         : Colors.grey,
                                     shape: BoxShape.circle,
                                   ),
@@ -2218,7 +2193,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: isTracking
-                                        ? Colors.green
+                                        ? AppColors.danger
                                         : Colors.grey,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -2229,11 +2204,11 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                                     width: 8,
                                     height: 8,
                                     decoration: BoxDecoration(
-                                      color: Colors.green,
+                                      color: AppColors.danger,
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.green.withValues(
+                                          color: AppColors.danger.withValues(
                                             alpha: 0.5,
                                           ),
                                           blurRadius: 4,
@@ -2252,6 +2227,144 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                   ),
                 ),
 
+                // Active job bottom card for the current in-progress pickup
+                if (_activeRequestId != null && _activeRequestData != null)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: Card(
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.danger,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.directions_bus,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _activeRequestData!['userTown'] ??
+                                        'Active pickup',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _formatPickupDate(
+                                      _activeRequestData!['pickupDate'],
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _formatWasteCategories(
+                                      _activeRequestData!['wasteCategories'],
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (_activeRequestData!['status'] ==
+                                            'in_progress')
+                                        ? AppColors.danger.withValues(
+                                            alpha: 0.15,
+                                          )
+                                        : Colors.orange.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    (_activeRequestData!['status'] ==
+                                            'in_progress')
+                                        ? 'IN PROGRESS'
+                                        : 'ACCEPTED',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          _activeRequestData!['status'] ==
+                                              'in_progress'
+                                          ? AppColors.danger
+                                          : Colors.orange,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        _showRequestDetails(
+                                          _activeRequestId!,
+                                          _activeRequestData!,
+                                        );
+                                      },
+                                      child: const Text('Details'),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _navigateToLocation(
+                                          _activeRequestId!,
+                                          _activeRequestData!,
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.danger,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: const Text('Navigate'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                 // Request count indicator
                 Positioned(
                   top: 80,
@@ -2269,7 +2382,7 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
                           const Icon(
                             Icons.assignment,
                             size: 16,
-                            color: Colors.blue,
+                            color: AppColors.danger,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -2351,7 +2464,9 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
               return FloatingActionButton(
                 heroTag: "tracking",
                 mini: true,
-                backgroundColor: isTracking ? Colors.red : Colors.green,
+                backgroundColor: isTracking
+                    ? AppColors.danger
+                    : Colors.grey.shade400,
                 onPressed: _toggleLocationTracking,
                 tooltip: isTracking
                     ? 'Stop location tracking'
@@ -2423,15 +2538,15 @@ class _CollectorMapScreenState extends State<CollectorMapScreen>
         await locationService.startLocationTracking(widget.collectorId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Row(
+            SnackBar(
+              content: const Row(
                 children: [
                   Icon(Icons.location_on, color: Colors.white),
                   SizedBox(width: 8),
                   Text('Location tracking started'),
                 ],
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.danger,
             ),
           );
         }

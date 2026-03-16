@@ -1,6 +1,6 @@
 ﻿import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class SummaryCardsRow extends StatelessWidget {
   final String collectorId;
@@ -92,7 +92,7 @@ class CollectorTotalPickupsText extends StatelessWidget {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.green,
+            color: AppColors.danger,
           ),
         );
       },
@@ -176,28 +176,25 @@ class MissedRequestsSummaryCard extends StatelessWidget {
         if (snapshot.hasError) {
           count = 'Err';
         } else if (snapshot.hasData) {
-
-
           final missedDocs = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final pickupDate = data['pickupDate'];
-            
+
             if (pickupDate is Timestamp) {
               final scheduledDate = pickupDate.toDate();
-              
+
               // Check if the scheduled pickup date has passed (is in the past)
               // and the request is not completed
               final isPastDate = scheduledDate.isBefore(now);
-              
+
               // Don't count as missed if collector has completed but user hasn't confirmed
               // (status would be 'pending_confirmation' which is not in our whereIn clause)
-              
+
               return isPastDate;
             }
 
             return false;
           }).toList();
-
 
           count = missedDocs.length.toString();
         }
@@ -259,6 +256,3 @@ Widget _buildSummaryCard({
     ),
   );
 }
-
-
-

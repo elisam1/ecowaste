@@ -625,9 +625,6 @@ class _UserCollectorTrackingScreenState
         ),
         backgroundColor: AppColors.indigo,
         duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
       ),
     );
   }

@@ -832,134 +832,114 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: CustomScrollView(
-        slivers: [
-          // Beautiful App Bar
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text(
-                'Request Pickup',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      backgroundColor: Colors.indigo.shade50,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.indigo.shade600, Colors.indigo.shade800],
                 ),
               ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.green.shade600, Colors.green.shade800],
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -50,
+                    top: -50,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -50,
-                      top: -50,
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
+                  Positioned(
+                    right: 20,
+                    bottom: 20,
+                    child: Icon(
+                      Icons.recycling,
+                      size: 40,
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  Positioned(
+                    left: 24,
+                    bottom: 24,
+                    child: Text(
+                      'Request Pickup',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 24,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    Positioned(
-                      right: 20,
-                      bottom: 20,
-                      child: Icon(
-                        Icons.recycling,
-                        size: 40,
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.white,
-          ),
-
-          // Form Content
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: SingleChildScrollView(
                     child: Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          // User Information Card
                           _buildAnimatedCard(
                             delay: 0,
                             child: _buildUserInfoSection(),
                           ),
                           const SizedBox(height: 16),
-
-                          // NEW: Pickup Type Selection Card
                           _buildAnimatedCard(
                             delay: 200,
                             child: _buildPickupTypeSection(),
                           ),
                           const SizedBox(height: 16),
-
-                          // Schedule Card (Updated)
                           _buildAnimatedCard(
                             delay: 500,
                             child: _buildScheduleSection(),
                           ),
                           const SizedBox(height: 16),
-                          // NEW: Bin Selection and Payment Card
                           _buildAnimatedCard(
                             delay: 300,
                             child: _buildBinSelectionAndPaymentSection(),
                           ),
-
                           const SizedBox(height: 16),
-
-                          // Location Card
                           _buildAnimatedCard(
                             delay: 700,
                             child: _buildLocationSection(),
                           ),
-
                           const SizedBox(height: 16),
-
-                          // Collector Selection Card
                           _buildAnimatedCard(
                             delay: 900,
                             child: _buildCollectorSection(),
                           ),
-
                           const SizedBox(height: 32),
-
-                          // Submit Button
                           _buildAnimatedCard(
                             delay: 1100,
                             child: _buildSubmitButton(),
                           ),
-
                           const SizedBox(height: 32),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -2100,7 +2080,7 @@ class _WastePickupFormUpdatedState extends State<WastePickupFormUpdated>
             ),
             const SizedBox(height: 4),
             Text(
-              'Pay \$${totalCost.toStringAsFixed(2)} â€¢ ${_selectedBinCount} bin${_selectedBinCount > 1 ? 's' : ''}',
+              'Pay \$${totalCost.toStringAsFixed(2)} â€¢ $_selectedBinCount bin${_selectedBinCount > 1 ? 's' : ''}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,

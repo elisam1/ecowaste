@@ -165,7 +165,6 @@ class _TeamChatDetail extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 FloatingActionButton(
-                  heroTag: 'chat_send_message_fab',
                   mini: true,
                   backgroundColor: const Color(0xFF1A5D4A),
                   onPressed: () {},

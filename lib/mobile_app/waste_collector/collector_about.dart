@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 
 class CollectorAboutPage extends StatefulWidget {
   const CollectorAboutPage({super.key});
@@ -373,7 +374,7 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
   Widget _buildMissionSection() => _buildSection(
     title: 'Our Mission',
     icon: Icons.flag,
-    child: _sectionCard(_missionStatement, Colors.green),
+    child: _sectionCard(_missionStatement, AppColors.danger),
   );
 
   Widget _buildFeatureCard(CollectorFeatureItem feature) {
@@ -427,26 +428,28 @@ class _CollectorAboutPageState extends State<CollectorAboutPage>
 
   Widget _sectionCard(
     String text,
-    MaterialColor color, {
+    Color color, {
     IconData? icon,
     String? title,
   }) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [color.shade50, color.shade100]),
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.05),
+            color.withValues(alpha: 0.15),
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.shade200),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           if (icon != null)
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.shade600,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               child: Icon(icon, color: Colors.white, size: 24),
             ),
           if (icon != null) const SizedBox(width: 16),

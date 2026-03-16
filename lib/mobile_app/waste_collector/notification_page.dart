@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_application_1/mobile_app/constants/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 
 class CollectorNotificationPage extends StatefulWidget {
   const CollectorNotificationPage({super.key});
@@ -247,23 +247,23 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: AppColors.danger.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green.shade200),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.payment, color: Colors.green.shade600, size: 20),
+              Icon(Icons.payment, color: AppColors.danger, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Payment Released! ðŸŽ‰',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.green.shade700,
+                  color: AppColors.danger,
                 ),
               ),
             ],
@@ -271,24 +271,24 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
           const SizedBox(height: 8),
           Text(
             'Amount: GHâ‚µ ${totalAmount.toStringAsFixed(2)} (${binCount} bin${binCount > 1 ? 's' : ''})',
-            style: TextStyle(fontSize: 13, color: Colors.green.shade700),
+            style: TextStyle(fontSize: 13, color: AppColors.danger),
           ),
           Text(
             'User: $userName',
-            style: TextStyle(fontSize: 13, color: Colors.green.shade700),
+            style: TextStyle(fontSize: 13, color: AppColors.danger),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.shade100,
+              color: AppColors.danger.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               'Payment has been released to your account',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.green.shade700,
+                color: AppColors.danger,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -304,9 +304,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
           .collection('notifications')
           .doc(notificationId)
           .update({'isRead': true});
-    } catch (e) {
-
-    }
+    } catch (e) {}
   }
 
   Future<void> _markAllAsRead() async {
@@ -327,7 +325,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('All notifications marked as read'),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -398,7 +396,7 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Notification deleted'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.danger,
             ),
           );
         }
@@ -415,6 +413,3 @@ class _CollectorNotificationPageState extends State<CollectorNotificationPage> {
     }
   }
 }
-
-
-
